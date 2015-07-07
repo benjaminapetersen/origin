@@ -142,9 +142,13 @@ module.exports = function (grunt) {
 
     // further enforce js style guildelines
     jscs: {
-        src: "./app/**/*.js",
         options: {
-            config: ".jscsrc"
+            config: ".jscsrc",
+            verbose: true,
+            fix: true
+        },
+        all: {
+          src: ["./app/**/*.js"]
         }
     },
 
