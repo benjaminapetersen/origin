@@ -28,20 +28,20 @@ angular.module('openshiftConsole')
     }));
 
     watches.push(DataService.watch("routes", $scope, function(routes){
-        $scope.routesByService = routesByService(routes.by("metadata.name"));
-        Logger.log("routes (subscribe)", $scope.routesByService);
+      $scope.routesByService = routesByService(routes.by("metadata.name"));
+      Logger.log("routes (subscribe)", $scope.routesByService);
     }));
 
     function routesByService(routes) {
-        var routeMap = {};
-        angular.forEach(routes, function(route, routeName){
+      var routeMap = {};
+      angular.forEach(routes, function(route, routeName){
           var to = route.spec.to;
           if (to.kind === "Service") {
             routeMap[to.name] = routeMap[to.name] || {};
             routeMap[to.name][routeName] = route;
           }
         });
-        return routeMap;
+      return routeMap;
     };
 
     function updateFilterWarning() {

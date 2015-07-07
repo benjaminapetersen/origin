@@ -150,7 +150,7 @@ angular.module('openshiftConsole')
   })
   .filter('httpHttps', function() {
     return function(isSecure) {
-        return isSecure ? 'https://' : 'http://';
+      return isSecure ? 'https://' : 'http://';
     };
   })
   .filter('githubLink', function() {
@@ -166,9 +166,9 @@ angular.module('openshiftConsole')
     };
   })
   .filter('yesNo', function() {
-      return function(isTrue) {
-          return isTrue ? 'Yes' : 'No';
-      };
+    return function(isTrue) {
+      return isTrue ? 'Yes' : 'No';
+    };
   })
   /**
    * Filter a hash of values

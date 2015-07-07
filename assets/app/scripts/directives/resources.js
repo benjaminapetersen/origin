@@ -5,7 +5,7 @@ angular.module('openshiftConsole')
     return {
       restrict: 'E',
       scope: {
-      	// Replication controller / deployment fields
+        // Replication controller / deployment fields
         rc: '=',
         deploymentConfigId: '=',
         deploymentConfigMissing: '=',

@@ -75,13 +75,13 @@ angular.module('openshiftConsole')
   };
 
   var normalizeType = function(type) {
-     if (!type) return type;
-     var lower = type.toLowerCase();
-     if (type !== lower) {
-       Logger.warn('Non-lower case type "' + type + '"');
-     }
+    if (!type) return type;
+    var lower = type.toLowerCase();
+    if (type !== lower) {
+      Logger.warn('Non-lower case type "' + type + '"');
+    }
 
-     return lower;
+    return lower;
   }
 
   function DataService() {
@@ -106,14 +106,14 @@ angular.module('openshiftConsole')
 
   }
 
-// type:      API type (e.g. "pods")
-// context:   API context (e.g. {project: "..."})
-// callback:  function to be called with the list of the requested type and context,
-//            parameters passed to the callback:
-//            Data:   a Data object containing the (context-qualified) results
-//                    which includes a helper method for returning a map indexed
-//                    by attribute (e.g. data.by('metadata.name'))
-// opts:      options (currently none, placeholder)
+  // type:      API type (e.g. "pods")
+  // context:   API context (e.g. {project: "..."})
+  // callback:  function to be called with the list of the requested type and context,
+  //            parameters passed to the callback:
+  //            Data:   a Data object containing the (context-qualified) results
+  //                    which includes a helper method for returning a map indexed
+  //                    by attribute (e.g. data.by('metadata.name'))
+  // opts:      options (currently none, placeholder)
   DataService.prototype.list = function(type, context, callback, opts) {
     type = normalizeType(type);
     var callbacks = this._listCallbacks(type, context);
@@ -133,11 +133,11 @@ angular.module('openshiftConsole')
     }
   };
 
-// type:      API type (e.g. "pods")
-// name:      API name, the unique name for the object
-// context:   API context (e.g. {project: "..."})
-// opts:      http - options to pass to the inner $http call
-// Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
+  // type:      API type (e.g. "pods")
+  // name:      API name, the unique name for the object
+  // context:   API context (e.g. {project: "..."})
+  // opts:      http - options to pass to the inner $http call
+  // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.delete = function(type, name, context, opts) {
     type = normalizeType(type);
     opts = opts || {};
@@ -163,13 +163,13 @@ angular.module('openshiftConsole')
     return deferred.promise;
   };
 
-// type:      API type (e.g. "pods")
-// name:      API name, the unique name for the object.
-//            In case the name of the Object is provided, expected format of 'type' parameter is 'type/subresource', eg: 'buildconfigs/instantiate'.
-// object:    API object data(eg. { kind: "Build", parameters: { ... } } )
-// context:   API context (e.g. {project: "..."})
-// opts:      http - options to pass to the inner $http call
-// Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
+  // type:      API type (e.g. "pods")
+  // name:      API name, the unique name for the object.
+  //            In case the name of the Object is provided, expected format of 'type' parameter is 'type/subresource', eg: 'buildconfigs/instantiate'.
+  // object:    API object data(eg. { kind: "Build", parameters: { ... } } )
+  // context:   API context (e.g. {project: "..."})
+  // opts:      http - options to pass to the inner $http call
+  // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.create = function(type, name, object, context, opts) {
     type = normalizeType(type);
     opts = opts || {};
@@ -232,12 +232,12 @@ angular.module('openshiftConsole')
     return result.promise;
   };
 
-// type:      API type (e.g. "pods")
-// name:      API name, the unique name for the object
-// context:   API context (e.g. {project: "..."})
-// opts:      force - always request (default is false)
-//            http - options to pass to the inner $http call
-//            errorNotification - will popup an error notification if the API request fails (default true)
+  // type:      API type (e.g. "pods")
+  // name:      API name, the unique name for the object
+  // context:   API context (e.g. {project: "..."})
+  // opts:      force - always request (default is false)
+  //            http - options to pass to the inner $http call
+  //            errorNotification - will popup an error notification if the API request fails (default true)
   DataService.prototype.get = function(type, name, context, opts) {
     if(this._objectType(type) !== undefined){
       type = this._objectType(type);
@@ -314,28 +314,28 @@ angular.module('openshiftConsole')
     return deferred.promise;
   };
 
-// type:      API type (e.g. "pods")
-// context:   API context (e.g. {project: "..."})
-// callback:  optional function to be called with the initial list of the requested type,
-//            and when updates are received, parameters passed to the callback:
-//            Data:   a Data object containing the (context-qualified) results
-//                    which includes a helper method for returning a map indexed
-//                    by attribute (e.g. data.by('metadata.name'))
-//            event:  specific event that caused this call ("ADDED", "MODIFIED",
-//                    "DELETED", or null) callbacks can optionally use this to
-//                    more efficiently process updates
-//            obj:    specific object that caused this call (may be null if the
-//                    entire list was updated) callbacks can optionally use this
-//                    to more efficiently process updates
-// opts:      options
-//            poll:   true | false - whether to poll the server instead of opening
-//                    a websocket. Default is false.
-//            pollInterval: in milliseconds, how long to wait between polling the server
-//                    only applies if poll=true.  Default is 5000.
-//
-// returns handle to the watch, needed to unwatch e.g.
-//        var handle = DataService.watch(type,context,callback[,opts])
-//        DataService.unwatch(handle)
+  // type:      API type (e.g. "pods")
+  // context:   API context (e.g. {project: "..."})
+  // callback:  optional function to be called with the initial list of the requested type,
+  //            and when updates are received, parameters passed to the callback:
+  //            Data:   a Data object containing the (context-qualified) results
+  //                    which includes a helper method for returning a map indexed
+  //                    by attribute (e.g. data.by('metadata.name'))
+  //            event:  specific event that caused this call ("ADDED", "MODIFIED",
+  //                    "DELETED", or null) callbacks can optionally use this to
+  //                    more efficiently process updates
+  //            obj:    specific object that caused this call (may be null if the
+  //                    entire list was updated) callbacks can optionally use this
+  //                    to more efficiently process updates
+  // opts:      options
+  //            poll:   true | false - whether to poll the server instead of opening
+  //                    a websocket. Default is false.
+  //            pollInterval: in milliseconds, how long to wait between polling the server
+  //                    only applies if poll=true.  Default is 5000.
+  //
+  // returns handle to the watch, needed to unwatch e.g.
+  //        var handle = DataService.watch(type,context,callback[,opts])
+  //        DataService.unwatch(handle)
   DataService.prototype.watch = function(type, context, callback, opts) {
     type = normalizeType(type);
     opts = opts || {};
@@ -849,8 +849,8 @@ angular.module('openshiftConsole')
 
     var typeInfo = SERVER_TYPE_MAP[type];
     if (!typeInfo) {
-    	Logger.error("_urlForType called with unknown type", type, arguments)
-    	return null;
+      Logger.error("_urlForType called with unknown type", type, arguments)
+      return null;
     }
 
     var protocol;
@@ -920,7 +920,7 @@ angular.module('openshiftConsole')
       var type = normalizeType(options.type);
       var u = this._urlForType(type, options.id, null, !!options.isWebsocket, opts);
       if (u) {
-      	return u.toString();
+        return u.toString();
       }
     }
     return null;

@@ -27,7 +27,7 @@ angular.module('openshiftConsole')
             scope.uploadError = true;
             Logger.error(e);
           };
-//          reader.readAsBinaryString(file);
+          //          reader.readAsBinaryString(file);
           reader.onerror();
         });
       }

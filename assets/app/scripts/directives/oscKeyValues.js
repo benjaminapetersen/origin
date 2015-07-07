@@ -29,20 +29,20 @@ angular.module("openshiftConsole")
     };
     $scope.addEntry = function() {
       if($scope.key && $scope.value){
-       var readonly = $scope.readonlyKeys.split(",");
-       if(readonly.indexOf($scope.key) !== -1){
-         return;
-       }
-       added[$scope.key] = "";
-       $scope.entries[$scope.key] = $scope.value;
-       $scope.key = null;
-       $scope.value = null;
-       $scope.form.$setPristine();
-       $scope.form.$setUntouched();
-       $scope.form.$setValidity();
+        var readonly = $scope.readonlyKeys.split(",");
+        if(readonly.indexOf($scope.key) !== -1){
+          return;
+        }
+        added[$scope.key] = "";
+        $scope.entries[$scope.key] = $scope.value;
+        $scope.key = null;
+        $scope.value = null;
+        $scope.form.$setPristine();
+        $scope.form.$setUntouched();
+        $scope.form.$setValidity();
       }
-     };
-     $scope.deleteEntry = function(key) {
+    };
+    $scope.deleteEntry = function(key) {
        if ($scope.entries[key]) {
          delete $scope.entries[key];
          delete added[key];

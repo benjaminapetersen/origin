@@ -69,12 +69,12 @@ angular.module('openshiftConsole')
         var fragmentParams = new URI("?" + u.fragment()).query(true); 
         authLogger.log("RedirectLoginService.finish()", queryParams, fragmentParams);
 
-       // Error codes can come in query params or fragment params
-       // Handle an error response from the OAuth server
+        // Error codes can come in query params or fragment params
+        // Handle an error response from the OAuth server
         var error = queryParams.error || fragmentParams.error;
-       if (error) {
-         var error_description = queryParams.error_description || fragmentParams.error_description;
-         var error_uri = queryParams.error_uri || fragmentParams.error_uri;
+        if (error) {
+          var error_description = queryParams.error_description || fragmentParams.error_description;
+          var error_uri = queryParams.error_uri || fragmentParams.error_uri;
           authLogger.log("RedirectLoginService.finish(), error", error, error_description, error_uri);
           return $q.reject({
             error: error,

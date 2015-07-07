@@ -14,7 +14,7 @@ angular.module("openshiftConsole")
           return Math.floor((1 + Math.random()) * 0x10000)
               .toString(16)
               .substring(1);
-          }
+        }
         return s4()+s4()+s4()+s4();
       };
 
@@ -27,14 +27,14 @@ angular.module("openshiftConsole")
       var first = "None";
       ports.forEach(function(port){
         if(first === "None"){
+          first = port;
+        }else{
+          if(port.containerPort < first.containerPort){
             first = port;
-          }else{
-            if(port.containerPort < first.containerPort){
-              first = port;
-            }
           }
         }
-      );
+      }
+    );
       return first;
     };
 
@@ -256,15 +256,15 @@ angular.module("openshiftConsole")
         }
       };
       //TODO add in when server supports headless services without a port spec
-//      if(port === 'None'){
-//        service.spec.portalIP = 'None';
-//      }else{
-        service.spec.ports = [{
+      //      if(port === 'None'){
+      //        service.spec.portalIP = 'None';
+      //      }else{
+      service.spec.ports = [{
           port: port.containerPort,
           targetPort: port.containerPort,
           protocol: port.protocol
         }];
-//      }
+      //      }
       return service;
     };
 

@@ -13,9 +13,9 @@ window.OPENSHIFT_CONFIG = {
     }
   },
   auth: {
-  	oauth_authorize_uri: "https://localhost:8443/oauth/authorize",
-  	oauth_redirect_base: "https://localhost:9000",
-  	oauth_client_id: "openshift-web-console",
-  	logout_uri: ""
+    oauth_authorize_uri: "https://localhost:8443/oauth/authorize",
+    oauth_redirect_base: "https://localhost:9000",
+    oauth_client_id: "openshift-web-console",
+    logout_uri: ""
   }
 };

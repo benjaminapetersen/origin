@@ -23,9 +23,9 @@ angular.module('openshiftConsole')
     var _interceptors = [];
     angular.forEach($httpProvider.interceptors, function(interceptorFactory) {
       if (angular.isString(interceptorFactory)) {
-      	_interceptors.unshift($injector.get(interceptorFactory));
+        _interceptors.unshift($injector.get(interceptorFactory));
       } else {
-      	_interceptors.unshift($injector.invoke(interceptorFactory));
+        _interceptors.unshift($injector.invoke(interceptorFactory));
       }
     });
 

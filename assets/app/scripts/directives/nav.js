@@ -72,9 +72,9 @@ angular.module('openshiftConsole')
         updateOptions();
 
         select.selectpicker({
-              iconBase: 'fa',
-              tickIcon: 'fa-check'
-          }).change(function() {
+          iconBase: 'fa',
+          tickIcon: 'fa-check'
+        }).change(function() {
           var newProject = $( this ).val();
           var currentURL = $location.url();
           var currProjRegex = /\/project\/[^\/]+/;

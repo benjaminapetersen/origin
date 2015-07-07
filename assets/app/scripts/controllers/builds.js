@@ -105,7 +105,7 @@ angular.module('openshiftConsole')
       };
       DataService.create("buildconfigs/instantiate", buildConfigName, req, $scope).then(
         function(build) { //success
-            $scope.alerts = [
+          $scope.alerts = [
             {
               type: "success",
               message: "Build " + build.metadata.name + " has started.",
@@ -135,7 +135,7 @@ angular.module('openshiftConsole')
       };
       DataService.create("builds/clone", buildName, req, $scope).then(
         function(build) { //success
-            $scope.alerts = [
+          $scope.alerts = [
             {
               type: "success",
               message: "Build " + buildName + " is being rebuilt as " + build.metadata.name + ".",

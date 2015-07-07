@@ -18,49 +18,49 @@ angular.module('openshiftConsole')
                         LabelFilter,
                         Logger,
                         ImageStreamResolver) {
-    $scope.pods = {};
-    $scope.services = {};
-    $scope.routesByService = {};
-    // The "best" route to display on the overview page for each service
-    // (one with a custom host if present)
-    $scope.displayRouteByService = {};
-    $scope.unfilteredServices = {};
-    $scope.deployments = {};
-    // Initialize to undefined so we know when deployment configs are actually loaded.
-    $scope.deploymentConfigs = undefined;
-    $scope.builds = {};
-    $scope.imageStreams = {};
-    $scope.imagesByDockerReference = {};
-    $scope.imageStreamImageRefByDockerReference = {}; // lets us determine if a particular container's docker image reference belongs to an imageStream
+                $scope.pods = {};
+                $scope.services = {};
+                $scope.routesByService = {};
+                // The "best" route to display on the overview page for each service
+                // (one with a custom host if present)
+                $scope.displayRouteByService = {};
+                $scope.unfilteredServices = {};
+                $scope.deployments = {};
+                // Initialize to undefined so we know when deployment configs are actually loaded.
+                $scope.deploymentConfigs = undefined;
+                $scope.builds = {};
+                $scope.imageStreams = {};
+                $scope.imagesByDockerReference = {};
+                $scope.imageStreamImageRefByDockerReference = {}; // lets us determine if a particular container's docker image reference belongs to an imageStream
 
-    // All pods under a service (no "" service key)
-    $scope.podsByService = {};
-    // All pods under a deployment (no "" deployment key)
-    $scope.podsByDeployment = {};
-    // Pods not in a deployment
-    // "" service key for pods not under any service
-    $scope.monopodsByService = {};
-    // All deployments
-    // "" service key for deployments not under any service
-    // "" deployment config for deployments not created from a deployment config
-    $scope.deploymentsByServiceByDeploymentConfig = {};
-    // All deployments
-    // "" service key for deployments not under any service
-    // Only being built to improve efficiency in the podRelationships method, not used by the view
-    $scope.deploymentsByService = {};
-    // All deployment configs
-    // "" service key for deployment configs not under any service
-    $scope.deploymentConfigsByService = {};
+                // All pods under a service (no "" service key)
+                $scope.podsByService = {};
+                // All pods under a deployment (no "" deployment key)
+                $scope.podsByDeployment = {};
+                // Pods not in a deployment
+                // "" service key for pods not under any service
+                $scope.monopodsByService = {};
+                // All deployments
+                // "" service key for deployments not under any service
+                // "" deployment config for deployments not created from a deployment config
+                $scope.deploymentsByServiceByDeploymentConfig = {};
+                // All deployments
+                // "" service key for deployments not under any service
+                // Only being built to improve efficiency in the podRelationships method, not used by the view
+                $scope.deploymentsByService = {};
+                // All deployment configs
+                // "" service key for deployment configs not under any service
+                $scope.deploymentConfigsByService = {};
 
-    $scope.labelSuggestions = {};
-    $scope.alerts = $scope.alerts || {};
-    $scope.emptyMessage = "Loading...";
-    $scope.renderOptions = $scope.renderOptions || {};
-    $scope.renderOptions.showSidebarRight = false;
+                $scope.labelSuggestions = {};
+                $scope.alerts = $scope.alerts || {};
+                $scope.emptyMessage = "Loading...";
+                $scope.renderOptions = $scope.renderOptions || {};
+                $scope.renderOptions.showSidebarRight = false;
 
-    var watches = [];
+                var watches = [];
 
-    watches.push(DataService.watch("pods", $scope, function(pods) {
+                watches.push(DataService.watch("pods", $scope, function(pods) {
       $scope.pods = pods.by("metadata.name");
       podRelationships();
       // Must be called after podRelationships()
@@ -69,7 +69,7 @@ angular.module('openshiftConsole')
       Logger.log("pods", $scope.pods);
     }));
 
-    watches.push(DataService.watch("services", $scope, function(services) {
+                watches.push(DataService.watch("services", $scope, function(services) {
       $scope.unfilteredServices = services.by("metadata.name");
 
       LabelFilter.addLabelSuggestionsFromResources($scope.unfilteredServices, $scope.labelSuggestions);
@@ -89,7 +89,7 @@ angular.module('openshiftConsole')
       Logger.log("services (list)", $scope.services);
     }));
 
-    watches.push(DataService.watch("routes", $scope, function(routes) {
+                watches.push(DataService.watch("routes", $scope, function(routes) {
       var routeMap = $scope.routesByService = {};
       var displayRouteMap = $scope.displayRouteByService = {};
       angular.forEach(routes.by("metadata.name"), function(route, routeName){
@@ -111,8 +111,8 @@ angular.module('openshiftConsole')
       Logger.log("routes (subscribe)", $scope.routesByService);
     }));
 
-    // Expects deploymentsByServiceByDeploymentConfig to be up to date
-    function podRelationships() {
+                // Expects deploymentsByServiceByDeploymentConfig to be up to date
+                function podRelationships() {
       $scope.monopodsByService = {"": {}};
       $scope.podsByService = {};
       $scope.podsByDeployment = {};
@@ -167,8 +167,8 @@ angular.module('openshiftConsole')
       Logger.log("monopodsByService", $scope.monopodsByService);
     };
 
-    // Filter out monopods we know we don't want to see
-    function showMonopod(pod) {
+                // Filter out monopods we know we don't want to see
+                function showMonopod(pod) {
       // Hide pods in the Succeeded, Terminated, and Failed phases since these
       // are run once pods that are done.
       if (pod.status.phase === 'Succeeded' ||
@@ -194,7 +194,7 @@ angular.module('openshiftConsole')
       return true;
     }
 
-    function deploymentConfigsByService() {
+                function deploymentConfigsByService() {
       $scope.deploymentConfigsByService = {"": {}};
       angular.forEach($scope.deploymentConfigs, function(deploymentConfig, depName){
         var foundMatch = false;
@@ -214,7 +214,7 @@ angular.module('openshiftConsole')
       });
     };
 
-    function deploymentsByService() {
+                function deploymentsByService() {
       var bySvc = $scope.deploymentsByService = {"": {}};
       var bySvcByDepCfg = $scope.deploymentsByServiceByDeploymentConfig = {"": {}};
 
@@ -245,8 +245,8 @@ angular.module('openshiftConsole')
       });
     };
 
-    // Sets up subscription for deployments
-    watches.push(DataService.watch("replicationcontrollers", $scope, function(deployments, action, deployment) {
+                // Sets up subscription for deployments
+                watches.push(DataService.watch("replicationcontrollers", $scope, function(deployments, action, deployment) {
       $scope.deployments = deployments.by("metadata.name");
       if (deployment) {
         if (action !== "DELETED") {
@@ -269,15 +269,15 @@ angular.module('openshiftConsole')
       Logger.log("deployments (subscribe)", $scope.deployments);
     }));
 
-    // Sets up subscription for imageStreams
-    watches.push(DataService.watch("imagestreams", $scope, function(imageStreams) {
+                // Sets up subscription for imageStreams
+                watches.push(DataService.watch("imagestreams", $scope, function(imageStreams) {
       $scope.imageStreams = imageStreams.by("metadata.name");
       ImageStreamResolver.buildDockerRefMapForImageStreams($scope.imageStreams, $scope.imageStreamImageRefByDockerReference);
       ImageStreamResolver.fetchReferencedImageStreamImages($scope.pods, $scope.imagesByDockerReference, $scope.imageStreamImageRefByDockerReference, $scope);
       Logger.log("imagestreams (subscribe)", $scope.imageStreams);
     }));
 
-    function associateDeploymentConfigTriggersToBuild(deploymentConfig, build) {
+                function associateDeploymentConfigTriggersToBuild(deploymentConfig, build) {
       // Make sure we have both a deploymentConfig and a build
       if (!deploymentConfig || !build) {
         return;
@@ -296,7 +296,7 @@ angular.module('openshiftConsole')
           var buildOutputImage = imageObjectRefFilter(build.spec.output.to, build.metadata.namespace);
           var deploymentTriggerImage = imageObjectRefFilter(trigger.imageChangeParams.from, deploymentConfig.metadata.namespace);
           if (buildOutputImage !== deploymentTriggerImage) {
-              continue;
+            continue;
           }
 
           trigger.builds = trigger.builds || {};
@@ -305,8 +305,8 @@ angular.module('openshiftConsole')
       }
     };
 
-    // Sets up subscription for deploymentConfigs, associates builds to triggers on deploymentConfigs
-    watches.push(DataService.watch("deploymentconfigs", $scope, function(deploymentConfigs, action, deploymentConfig) {
+                // Sets up subscription for deploymentConfigs, associates builds to triggers on deploymentConfigs
+                watches.push(DataService.watch("deploymentconfigs", $scope, function(deploymentConfigs, action, deploymentConfig) {
       $scope.deploymentConfigs = deploymentConfigs.by("metadata.name");
       if (!action) {
         angular.forEach($scope.deploymentConfigs, function(depConfig) {
@@ -328,8 +328,8 @@ angular.module('openshiftConsole')
       Logger.log("deploymentconfigs (subscribe)", $scope.deploymentConfigs);
     }));
 
-    // Sets up subscription for builds, associates builds to triggers on deploymentConfigs
-    watches.push(DataService.watch("builds", $scope, function(builds, action, build) {
+                // Sets up subscription for builds, associates builds to triggers on deploymentConfigs
+                watches.push(DataService.watch("builds", $scope, function(builds, action, build) {
       $scope.builds = builds.by("metadata.name");
       if (!action) {
         angular.forEach($scope.builds, function(bld) {
@@ -349,8 +349,8 @@ angular.module('openshiftConsole')
       Logger.log("builds (subscribe)", $scope.builds);
     }));
 
-    // Show the "Get Started" message if the project is empty.
-    function updateShowGetStarted() {
+                // Show the "Get Started" message if the project is empty.
+                function updateShowGetStarted() {
       var projectEmpty =
         hashSizeFilter($scope.unfilteredServices) === 0 &&
         hashSizeFilter($scope.pods) === 0 &&
@@ -361,7 +361,7 @@ angular.module('openshiftConsole')
       $scope.renderOptions.showGetStarted = projectEmpty;
     }
 
-    function updateFilterWarning() {
+                function updateFilterWarning() {
       if (!LabelFilter.getLabelSelector().isEmpty() && $.isEmptyObject($scope.services) && !$.isEmptyObject($scope.unfilteredServices)) {
         $scope.alerts["services"] = {
           type: "warning",
@@ -373,11 +373,11 @@ angular.module('openshiftConsole')
       }
     };
 
-    function isGeneratedHost(route) {
+                function isGeneratedHost(route) {
       return annotationFilter(route, "openshift.io/host.generated") === "true";
     }
 
-    LabelFilter.onActiveFiltersChanged(function(labelSelector) {
+                LabelFilter.onActiveFiltersChanged(function(labelSelector) {
       // trigger a digest loop
       $scope.$apply(function() {
         $scope.services = labelSelector.select($scope.unfilteredServices);
@@ -385,7 +385,7 @@ angular.module('openshiftConsole')
       });
     });
 
-    $scope.$on('$destroy', function(){
+                $scope.$on('$destroy', function(){
       DataService.unwatchAll(watches);
     });
-  });
+              });

@@ -46,13 +46,13 @@ angular.module('openshiftConsole')
   };
 
   var loadService = function(injector, name, setter) {
-  	if (!name) {
-  	  throw setter + " not set";
-  	} else if (angular.isString(name)) {
-  	  return injector.get(name);
-  	} else {
-  	  return injector.invoke(name);
-  	}
+    if (!name) {
+      throw setter + " not set";
+    } else if (angular.isString(name)) {
+      return injector.get(name);
+    } else {
+      return injector.invoke(name);
+    }
   };
 
   this.$get = function($q, $injector, $log, $rootScope, Logger) {

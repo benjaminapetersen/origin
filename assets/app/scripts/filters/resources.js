@@ -225,19 +225,19 @@ angular.module('openshiftConsole')
   })
   .filter('isWebRoute', function(){
     return function(route){
-       //TODO: implement when we can tell if routes are http(s) or not web related which will drive
-       // links in view
-       return true;
+      //TODO: implement when we can tell if routes are http(s) or not web related which will drive
+      // links in view
+      return true;
     };
   })
   .filter('routeWebURL', function(){
     return function(route){
-        var scheme = (route.spec.tls && route.spec.tls.tlsTerminationType !== "") ? "https" : "http";
-        var url = scheme + "://" + route.spec.host;
-        if (route.spec.path) {
-            url += route.spec.path;
-        }
-        return url;
+      var scheme = (route.spec.tls && route.spec.tls.tlsTerminationType !== "") ? "https" : "http";
+      var url = scheme + "://" + route.spec.host;
+      if (route.spec.path) {
+        url += route.spec.path;
+      }
+      return url;
     };
   })
   .filter('routeLabel', function() {
@@ -481,17 +481,17 @@ angular.module('openshiftConsole')
           case "v1":
             return  depConfig.status.details.causes;
           default:
-          // Unrecognized API version. Log an error.
-          Logger.error('Unknown API version "' + depConfig.apiVersion +
-                       '" in encoded deployment config for deployment ' +
-                       deployment.metadata.name);
+            // Unrecognized API version. Log an error.
+            Logger.error('Unknown API version "' + depConfig.apiVersion +
+                         '" in encoded deployment config for deployment ' +
+                         deployment.metadata.name);
 
-          // Try to fall back to the last thing we know.
-          if (depConfig.status && depConfig.status.details && depConfig.status.details.causes) {
-            return depConfig.status.details.causes;
-          }
+            // Try to fall back to the last thing we know.
+            if (depConfig.status && depConfig.status.details && depConfig.status.details.causes) {
+              return depConfig.status.details.causes;
+            }
 
-          return [];
+            return [];
         }
       }
       catch (e) {

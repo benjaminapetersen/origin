@@ -64,7 +64,7 @@ angular.module("openshiftConsole")
         function(){
           Navigate.toErrorPage("Cannot create from source: the specified image could not be retrieved.");
         });
-        scope.name = NameGenerator.suggestFromSourceUrl(scope.buildConfig.sourceUrl);
+      scope.name = NameGenerator.suggestFromSourceUrl(scope.buildConfig.sourceUrl);
     }
 
     initAndValidate($scope);
@@ -138,8 +138,8 @@ angular.module("openshiftConsole")
                 d.resolve({alerts: alerts, hasErrors: hasErrors});
               }
             );
-            return d.promise;
-          },
+        return d.promise;
+      },
           function(result) { // failure
             $scope.alerts = [
               {

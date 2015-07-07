@@ -10,4 +10,4 @@ angular.module("openshiftConsole")
       },
       templateUrl: "views/directives/osc-image-summary.html"
     };
-});
+  });
