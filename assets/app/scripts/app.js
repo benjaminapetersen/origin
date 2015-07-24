@@ -18,7 +18,8 @@ angular
     'ngSanitize',
     'ngTouch',
     'openshiftUI',
-    'kubernetesUI'
+    'kubernetesUI',
+    'extension-registry'
   ])
   .constant("mainNavTabs", [])  // even though its not really a "constant", it has to be created as a constant and not a value
                          // or it can't be referenced during module config
@@ -201,6 +202,6 @@ angular
         return durationFilter($(this).attr("data-timestamp")) || existing;
       });
     }, 1000);
-  });
+  })
 
 hawtioPluginLoader.addModule('openshiftConsole');

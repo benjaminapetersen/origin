@@ -6,7 +6,7 @@
  -->
 <div class="component-block pod-template-container">
   <div class="component pod-template-block" ng-repeat="container in podTemplate.spec.containers">
-    <div class="pod-template">                              
+    <div class="pod-template">
       <h4>{{container.name}}</h4>
       <div class="pod-template-image">
         <span class="fa fa-cube" aria-hidden="true"></span>
@@ -27,7 +27,7 @@
                 <span ng-switch-when="Git">
                   <span ng-if="build.spec.revision.git.commit">
                     {{build.spec.revision.git.message}}
-                    (<osc-git-link 
+                    (<osc-git-link
                       uri="build.spec.source.git.uri"
                       commit="build.spec.revision.git.commit">{{build.spec.revision.git.commit | limitTo:7}}</osc-git-link>)
                     <span ng-if="build.spec.revision.git.author">
@@ -46,7 +46,7 @@
           </div>
         </div>
       </div>
-      
+
       <div ng-if="container.ports.length > 0" class="pod-template-ports">
         <div class="font-icon-block">
           <!-- TODO figure out why the font-icon-block does not align correctly when the class names are used instead
@@ -58,9 +58,20 @@
         <div ng-repeat="port in container.ports" class="port-number">
           <span>{{port.containerPort}} ({{port.protocol}})<span ng-if="port.hostPort"> <span class="port-icon">&#10230;</span> {{port.hostPort}}</span></span>
         </div>
-      </div> 
+      </div>
 
+      <!--
+        Current extension management component
+      -->
       <div hawtio-extension name="container-links"></div>
+
+      <!--
+        New extension management component
+      -->
+      <div
+        extension-output
+        extension-name="pod:template"
+        extension-types="text link select html"></div>
 
     </div>
   </div>
