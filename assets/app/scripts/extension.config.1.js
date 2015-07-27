@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('openshiftConsole')
 .config([
   'extensionInputProvider',
@@ -17,7 +19,7 @@ angular.module('openshiftConsole')
         className: 'extension extension-pod',
         displayName: 'pod:template ext2',
         fn: function() {
-          alert('you have clicked this ' + (clickCount++) + ' times');
+          console.log('you have clicked this ' + (clickCount++) + ' times');
         }
       }
     ];
