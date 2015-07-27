@@ -202,6 +202,6 @@ angular
         return durationFilter($(this).attr("data-timestamp")) || existing;
       });
     }, 1000);
-  })
+  });
 
 hawtioPluginLoader.addModule('openshiftConsole');
