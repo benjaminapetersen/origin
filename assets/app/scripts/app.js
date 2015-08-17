@@ -19,11 +19,6 @@ angular
     'ngTouch',
     'openshiftUI',
     'kubernetesUI',
-
-    // our own modules
-    'osc.pods',
-    'osc.builds',
-    'osc.logs'
   ])
   .constant("mainNavTabs", [])  // even though its not really a "constant", it has to be created as a constant and not a value
                          // or it can't be referenced during module config
@@ -167,6 +162,33 @@ angular
       })
       .when('/project/:project/create/fromimage', {
         templateUrl: 'views/create/fromimage.html'
+      })
+      .when('/project/:project/logs', {
+        redirectTo: function(params) {
+          return '/project/' + encodeURIComponent(params.project) + "/logs/builds";
+        }
+      })
+      .when('/project/:project/logs/builds', {
+        templateUrl: 'views/logs/builds.html'
+      })
+      .when('/project/:project/logs/builds/:build/log', {
+        controller: 'projects.logs.builds.log',
+        templateUrl: function(params) {
+          return (params.view === 'chromeless') ?
+                    'views/logs/chromeless_log.html' :
+                    'views/logs/build_log.html';
+        }
+      })
+      .when('/project/:project/logs/pods', {
+        templateUrl: 'views/logs/pods.html'
+      })
+      .when('/project/:project/logs/pods/:pod/log', {
+        controller: 'projects.logs.pods.log',
+        templateUrl: function(params) {
+          return (params.view === 'chromeless') ?
+                    'views/logs/chromeless_log.html' :
+                    'views/logs/pod_log.html';
+        }
       })
       .when('/oauth', {
         templateUrl: 'views/util/oauth.html',

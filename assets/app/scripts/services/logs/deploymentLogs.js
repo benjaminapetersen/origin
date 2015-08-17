@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('osc.logs')
+angular.module('openshiftConsole')
   // TODO: perhaps change to 'log'
   .factory('buildLogs', [
     '$http',

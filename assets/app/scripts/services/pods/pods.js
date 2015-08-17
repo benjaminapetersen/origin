@@ -1,7 +1,7 @@
 'use strict';
 
 // tinkering.
-angular.module('osc.pods', [])
+angular.module('openshiftConsole')
   .factory('pods', [
     '$log',
     '$resource',

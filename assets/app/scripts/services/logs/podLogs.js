@@ -1,24 +1,25 @@
 'use strict';
 
-angular.module('osc.logs')
-  .factory('buildLogs', [
+angular.module('openshiftConsole')
+  .factory('podLogs', [
     '$http',
     'osConfig',
     function($http, osConfig) {
-
       var config = osConfig.getConfig();
       var protocol = osConfig.getProtocol();
       var httpUri = [
                   protocol,
                   '://',
-                  config.api.openshift.hostPort,
-                  config.api.openshift.prefix,
+                  config.api.k8s.hostPort,
+                  config.api.k8s.prefix,
                   '/',
-                  config.api.openshift.version,
-                  '/namespaces/<%= namespace %>/builds/<%= build %>/log'
+                  config.api.k8s.version,
+                  '/namespaces/<%= namespace %>',
+                  '/pods/<%= pod %>',
+                  '/log',
+                  '?container=<%= container %>'
                 ].join('');
       var httpUriCompiled = _.template(httpUri);
-
       return {
         get: function(opts) {
           return $http

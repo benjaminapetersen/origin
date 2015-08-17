@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('osc.logs')
+angular.module('openshiftConsole')
   .controller('projects.logs.start', [
     '$log',
     '$routeParams',
