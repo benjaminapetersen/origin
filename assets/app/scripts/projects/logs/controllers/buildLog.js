@@ -17,8 +17,6 @@ angular.module('osc.logs')
 
       $log.log('route params for build log', $routeParams);
 
-
-
       $q.all([
         builds.get({
           namespace: $routeParams.project,
