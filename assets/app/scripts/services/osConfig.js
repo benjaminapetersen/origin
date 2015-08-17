@@ -3,7 +3,7 @@
 angular
   .module('openshiftConsole')
   .factory('osConfig', [
-    function($document) {
+    function() {
 
       var getConfig = function() {
         return window.OPENSHIFT_CONFIG;
@@ -18,6 +18,6 @@ angular
       return {
         getConfig: getConfig,
         getProtocol: getProtocol
-      }
+      };
     }
   ]);

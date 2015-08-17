@@ -98,7 +98,7 @@ angular
     tab = builder
             .create()
             .id(builder.join(pluginName, 'logs'))
-            .title(function() { return 'logs'})
+            .title(function() { return 'logs'; })
             .template(template)
             .href(projectHref('logs'))
             .subPath('Builds', 'builds' )
