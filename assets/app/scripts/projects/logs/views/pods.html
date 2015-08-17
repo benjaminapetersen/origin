@@ -1,0 +1,16 @@
+<div ng-controller="ProjectController" class="content">
+  <project-page>
+    <div ng-controller="projects.logs.pods">
+      <div class="page-header page-header-bleed-right">
+        <h1>Project {{projectName}} pod and container logs</h1>
+      </div>
+      <alerts alerts="alerts"></alerts>
+      <div
+        ng-repeat="pod in pods | orderObjectsByDate : true"
+        class="pod-well">
+        <div
+          ng-include="'/scripts/projects/logs/views/_pod.html'"></div>
+      </div>
+    </div>
+  </project-page>
+</div>

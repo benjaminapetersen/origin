@@ -1,0 +1,12 @@
+<div ng-controller="ProjectController"  class="content">
+    <project-page>
+        <div ng-controller="projects.logs.builds.log">
+           <ng-include
+            src="'/scripts/projects/logs/views/_log_header.html'"></ng-include>
+          <ng-include
+            src="'/scripts/projects/logs/views/_log_controls.html'"></ng-include>
+          <ng-include
+            src="'/scripts/projects/logs/views/_log.html'"></ng-include>
+        </div>
+    </project-page>
+</div>

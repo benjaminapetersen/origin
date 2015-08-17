@@ -18,7 +18,12 @@ angular
     'ngSanitize',
     'ngTouch',
     'openshiftUI',
-    'kubernetesUI'
+    'kubernetesUI',
+
+    // our own modules
+    'osc.pods',
+    'osc.builds',
+    'osc.logs'
   ])
   .constant("mainNavTabs", [])  // even though its not really a "constant", it has to be created as a constant and not a value
                          // or it can't be referenced during module config
@@ -88,6 +93,19 @@ angular
      .page(function () { return builder.join(templatePath, 'settings.html'); })
      .build();
     tab.icon = "sliders";
+    tabs.push(tab);
+
+    tab = builder
+            .create()
+            .id(builder.join(pluginName, 'logs'))
+            .title(function() { return 'logs'})
+            .template(template)
+            .href(projectHref('logs'))
+            .subPath('Builds', 'builds' )
+            //.subPath('Deployments', 'deployments' )
+            .subPath('Pods', 'pods')
+            .build();
+    tab.icon = 'info';
     tabs.push(tab);
 
   }])
