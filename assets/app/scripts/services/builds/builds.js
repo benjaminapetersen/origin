@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('osc.builds', [])
+angular.module('openshiftConsole')
   .factory('builds', [
     '$log',
     '$resource',
