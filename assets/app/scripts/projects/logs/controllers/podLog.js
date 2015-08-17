@@ -30,9 +30,17 @@ angular.module('osc.logs')
           ready: true,
           logName: pod.metadata.name,
           pod: pod,
+          // plain text with line #s added
           log: podLog.data ?
-                podLog.data :
+                _.reduce(
+                  podLog.data.split('\n'),
+                  function(memo, next, i, list) {
+                    return (i < list.length) ?
+                              memo + _.padRight(i+1+'. ', 7) + next + '\n' :
+                              memo;
+                  },'') :
                 podLog.statusText,
+          // OR an array of lines... this makes Angular cry.
           logList: podLog.data ?
                     _.map(
                       podLog.data.split('\n'),

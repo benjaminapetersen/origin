@@ -15,8 +15,6 @@ angular.module('osc.logs')
     function($anchorScroll, $log, $location, $q, $routeParams, $scope, $window, DataService, builds, buildLogs) {
       $log.log('project/:project/logs/builds/:build/logs');
 
-      $log.log('route params for build log', $routeParams);
-
       $q.all([
         builds.get({
           namespace: $routeParams.project,
@@ -36,18 +34,17 @@ angular.module('osc.logs')
               text: ''
             },
             build: build,
-            // TODO: decide if we want the list @ all, or just
-            // go with the flat log...
+            // plain text with line #s added
             log: buildLog.data ?
-                    // buildLog.data  <- plain
-                    // or add line #s?
-                    _.reduce(
-                      buildLog.data.split('\n'),
-                      function(memo, next, i, list) {
-                        // TODO: if this, then need to ensure spacing @ start is uniform
-                        return memo + (i+1) + '. ' + next + '\n';
-                      },'') :
-                    buildLog.statusText,
+                  _.reduce(
+                    buildLog.data.split('\n'),
+                    function(memo, next, i, list) {
+                      return (i < list.length) ?
+                                memo + _.padRight(i+1+'. ', 7) + next + '\n' :
+                                memo;
+                    },'') :
+                  buildLog.statusText,
+            // OR an array of lines... this makes Angular cry.
             logList: buildLog.data ?
                         _.map(
                           buildLog.data.split('\n'),

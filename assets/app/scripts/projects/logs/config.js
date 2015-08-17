@@ -30,6 +30,7 @@ angular.module('osc.logs', [
                     'scripts/projects/logs/views/chromeless_log.html' :
                     'scripts/projects/logs/views/build_log.html';
         },
+        controller: 'projects.logs.builds.log'
       })
       .when('/project/:project/logs/pods', {
         templateUrl: 'scripts/projects/logs/views/pods.html'
@@ -40,18 +41,8 @@ angular.module('osc.logs', [
                     'scripts/projects/logs/views/chromeless_log.html' :
                     'scripts/projects/logs/views/pod_log.html';
         },
+        controller: 'projects.logs.pods.log'
       });
   }
 ]);
-// Concept for supporting an anchor-scroll to a specific log line.
-// our logs do not currently have timestamps, so this is not yet relevant.
-// .run([
-//   '$rootScope',
-//   '$location',
-//   '$anchorScroll',
-//   function($rootScope, $location, $anchorScroll) {
-//     $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
-//       if($location.hash()) $anchorScroll();
-//     });
-//   }
-// ]);
+
