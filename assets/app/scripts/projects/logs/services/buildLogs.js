@@ -5,16 +5,16 @@ angular.module('osc.logs')
     '$http',
     'osConfig',
     function($http, osConfig) {
+
       var config = osConfig.getConfig();
       var protocol = osConfig.getProtocol();
       var httpUri = [
                   protocol,
                   '://',
                   config.api.openshift.hostPort,
-                  //config.api.openshift.prefix,
-                  '/oapi',
+                  config.api.openshift.prefix,
                   '/',
-                  'v1',
+                  config.api.openshift.version,
                   '/namespaces/<%= namespace %>/builds/<%= build %>/log'
                 ].join('');
       var httpUriCompiled = _.template(httpUri);

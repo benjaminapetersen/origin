@@ -11,11 +11,9 @@ angular.module('osc.logs')
                   protocol,
                   '://',
                   config.api.k8s.hostPort,
-                  //config.api.k8s.prefix,
-                  '/api',
+                  config.api.k8s.prefix,
                   '/',
-                  //config.api.k8s.version, <!-- v1beta3 doesn't work. v1 does.
-                  'v1',
+                  config.api.k8s.version,
                   '/namespaces/<%= namespace %>',
                   '/pods/<%= pod %>',
                   '/log',
