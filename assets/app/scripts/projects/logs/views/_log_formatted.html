@@ -1,0 +1,10 @@
+<div
+  class="log-line"
+  ng-repeat="logLine in logList  | filter:logSearch"
+  ng-class-odd="'odd'"
+  ng-class-even="'even'"
+  style="border-bottom: 1px solid #F2F2F2;
+         padding: 2px;">
+  {{::$index+1 }}.&nbsp;&nbsp;{{::logLine.text}}
+  <a id="line_{{$index}}"></a>
+</div>
