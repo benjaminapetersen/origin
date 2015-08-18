@@ -1,21 +1,14 @@
-<div class="row">
-  <div class="col-sm-8 col-md-9">
-    <h3>Logs for {{logName}} in {{projectName}}</h3>
-
-    <div class="log-timestamp">
-      &nbsp;
-      <!-- when we get timestamps?
-      Current log from 2015-07-26 - 08:14:23 to 2015-07-30 - 21:36:04
-      -->
-    </div>
-  </div>
-  <div class="col-sm-4 col-md-3 align-md-right">
-    <div>
+<div layout column flex>
+  <div layout sm="column" md="row">
+    <div flex row main-axis="end">
       <a ng-click="goChromeless()">
         Open full view of log <i class="fa fa-external-link"></i>
       </a>
+      <!-- when we get timestamps?
+      <div class="log-timestamp">
+        Current log from 2015-07-26 - 08:14:23 to 2015-07-30 - 21:36:04
+      </div> -->
     </div>
-    <button class="btn btn-primary btn-block">View log archive</button>
   </div>
 </div>
 

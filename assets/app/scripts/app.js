@@ -80,16 +80,6 @@ angular
     tab.icon = "sitemap";
     tabs.push(tab);
 
-    tab = builder.create()
-     .id(builder.join(pluginName, "settings"))
-     .title(function () { return "Settings"; })
-     .template(template)
-     .href(projectHref("settings"))
-     .page(function () { return builder.join(templatePath, 'settings.html'); })
-     .build();
-    tab.icon = "sliders";
-    tabs.push(tab);
-
     tab = builder
             .create()
             .id(builder.join(pluginName, 'logs'))
@@ -100,7 +90,17 @@ angular
             //.subPath('Deployments', 'deployments' )
             .subPath('Pods', 'pods')
             .build();
-    tab.icon = 'info';
+    tab.icon = 'list-ol';
+    tabs.push(tab);
+
+    tab = builder.create()
+     .id(builder.join(pluginName, "settings"))
+     .title(function () { return "Settings"; })
+     .template(template)
+     .href(projectHref("settings"))
+     .page(function () { return builder.join(templatePath, 'settings.html'); })
+     .build();
+    tab.icon = "sliders";
     tabs.push(tab);
 
   }])
