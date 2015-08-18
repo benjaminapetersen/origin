@@ -25,10 +25,6 @@ angular.module('openshiftConsole')
         .then(
           _.spread(function(pod, podLog) {
 
-            console.log('What did we get');
-            console.log('pod', pod);
-            console.log('podLog', podLog);
-
             angular.extend($scope, {
               ready: true,
               logName: pod.metadata.name,
