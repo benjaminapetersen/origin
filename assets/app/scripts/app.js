@@ -93,7 +93,7 @@ angular
     tab = builder
             .create()
             .id(builder.join(pluginName, 'logs'))
-            .title(function() { return 'logs'; })
+            .title(function() { return 'Logs'; })
             .template(template)
             .href(projectHref('logs'))
             .subPath('Builds', 'builds' )
@@ -172,7 +172,6 @@ angular
         templateUrl: 'views/logs/builds.html'
       })
       .when('/project/:project/logs/builds/:build/log', {
-        controller: 'projects.logs.builds.log',
         templateUrl: function(params) {
           return (params.view === 'chromeless') ?
                     'views/logs/chromeless_log.html' :
@@ -183,7 +182,6 @@ angular
         templateUrl: 'views/logs/pods.html'
       })
       .when('/project/:project/logs/pods/:pod/log', {
-        controller: 'projects.logs.pods.log',
         templateUrl: function(params) {
           return (params.view === 'chromeless') ?
                     'views/logs/chromeless_log.html' :

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('openshiftConsole')
-  .controller('projects.logs.pods.log', [
+  .controller('PodLog', [
     '$log',
     '$location',
     '$q',
@@ -14,65 +14,85 @@ angular.module('openshiftConsole')
     function($log, $location, $q, $routeParams, $scope, $window, DataService, pods, podLogs) {
       $log.log('project/:project/logs/pods/:pod/logs');
 
-      $q.all([
-        pods.get({
-          namespace: $routeParams.project,
-          pod: $routeParams.pod
-        }).$promise,
-        podLogs.get({
-          namespace: $routeParams.project,
-          pod: $routeParams.pod,
-          container: $routeParams.container
-        })
-      ])
-      .then(_.spread(function(pod, podLog) {
-        angular.extend($scope, {
-          ready: true,
-          logName: pod.metadata.name,
-          pod: pod,
-          // plain text with line #s added
-          log: podLog.data ?
-                _.reduce(
-                  podLog.data.split('\n'),
-                  function(memo, next, i, list) {
-                    return (i < list.length) ?
-                              memo + _.padRight(i+1+'. ', 7) + next + '\n' :
-                              memo;
-                  },'') :
-                podLog.statusText,
-          // OR an array of lines... this makes Angular cry.
-          logList: podLog.data ?
-                    _.map(
-                      podLog.data.split('\n'),
-                      function(text) {
-                        return {
-                          text: text
-                        }
-                      }) :
-                    [{text: podLog.statusText}],
-          goFull: function() {
-           $location
-            .path($location.path())
-            .search(
-              angular.extend($location.search(), {
-                view: 'chromeless'
-            }));
+
+      $q
+        .all([
+          DataService
+            .get('pods', $routeParams.pod, $scope),
+          DataService
+            .get('pods/log', $routeParams.pod, $scope)
+        ])
+        .then(
+          _.spread(function(pod, podLog) {
+
+            console.log('What did we get');
+            console.log('pod', pod);
+            console.log('podLog', podLog);
+
+            angular.extend($scope, {
+              ready: true,
+              logName: pod.metadata.name,
+              // log is the log as a string.  this renders fine.
+              log: podLog ?
+                  _.reduce(
+                    podLog.split('\n'),
+                    function(memo, next, i, list) {
+                      return (i < list.length) ?
+                                memo + _.padRight(i+1+'. ', 7) + next + '\n' :
+                                memo;
+                    },'') :
+                  'Error retrieving pod log',
+              // log list is an array of log lines. Angular struggles with this.
+              logList: podLog ?
+                          _.map(
+                            podLog.split('\n'),
+                            function(text) {
+                              return {
+                                text: text
+                              }
+                            }) :
+                          [{text: 'Error retrieving pod log'}],
+              goFull: function() {
+               $location
+                .path($location.path())
+                .search(
+                  angular.extend($location.search(), {
+                    view: 'chromeless'
+                }));
+              },
+              goChromeless: function() {
+                $window
+                  .open([
+                    $location.path(),
+                    '?',
+                    $.param(
+                      angular
+                        .extend(
+                          $location.search(), {
+                            view: 'chromeless'
+                          }))
+                  ].join(''), '_blank');
+              }
+            });
+
+            _.delay(function() {
+              if($location.hash()) $anchorScroll();
+            });
+
           },
-          goChromeless: function() {
-            $window
-              .open([
-                $location.path(),
-                '?',
-                $.param(
-                  angular
-                    .extend(
-                      $location.search(), {
-                        view: 'chromeless'
-                      }))
-              ].join(''), '_blank');
-          }
-        })
-      }));
+          function() {
+            angular.extend($scope, {
+              log: arguments[0]
+            });
+          }))
+          .catch(function(err) {
+            angular.extend($scope, {
+              // for the moment just passing the error response up to print
+              log: err
+            });
+          });
+
+
     }
   ]);
 
