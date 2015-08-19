@@ -11,7 +11,8 @@ angular.module('openshiftConsole')
     '$window',
     'AuthService',
     'DataService',
-    function($anchorScroll, $location, $q, $routeParams, $scope, $timeout, $window, AuthService, DataService) {
+    'logLinks',
+    function($anchorScroll, $location, $q, $routeParams, $scope, $timeout, $window, AuthService, DataService, logLinks) {
 
       // TODO:
       // - config goes to service to configure the request
@@ -83,27 +84,9 @@ angular.module('openshiftConsole')
         .then(function() {
           angular.extend($scope, {
             ready: true,
-            goFull: function() {
-               $location
-                .path($location.path())
-                .search(
-                  angular.extend($location.search(), {
-                    view: 'chromeless'
-                }));
-              },
-              goChromeless: function() {
-                $window
-                  .open([
-                    $location.path(),
-                    '?',
-                    $.param(
-                      angular
-                        .extend(
-                          $location.search(), {
-                            view: 'chromeless'
-                          }))
-                  ].join(''), '_blank');
-              }
+            goFull: logLinks.fullPageLink,
+            goChromeless: logLinks.chromelessLink,
+            goText: logLinks.textOnlyLink
           });
         }, function() {
           angular.extend($scope, {

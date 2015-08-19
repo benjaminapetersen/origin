@@ -1,4 +1,4 @@
-<div class="spinner" ng-show="pending"></div>
+<div class="spinner" ng-show="!ready"></div>
 
 <div ng-show="ready">
   <a id="#LogTop"></a>
@@ -9,7 +9,7 @@
     <div layout flex row class="log-view-output">
       <ng-include
         src="'/views/logs/_log_raw.html'"></ng-include>
-      <!-- if we enable log filtering, this view will accomodate
+      <!-- if we enable log filtering, this view will accommodate
       <ng-include
         src="'/scripts/projects/logs/views/_log_formatted.html'"></ng-include>
        -->

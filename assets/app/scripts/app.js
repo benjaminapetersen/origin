@@ -174,8 +174,8 @@ angular
       .when('/project/:project/logs/builds/:build/log', {
         controller: 'BuildLog',
         templateUrl: function(params) {
-          return (params.view === 'chromeless') ?
-                    'views/logs/chromeless_log.html' :
+          return params.view ?
+                    'views/logs/'+params.view+'_log.html' :
                     'views/logs/build_log.html';
         }
       })
@@ -183,9 +183,10 @@ angular
         templateUrl: 'views/logs/pods.html'
       })
       .when('/project/:project/logs/pods/:pod/log', {
+        controller: 'PodLog',
         templateUrl: function(params) {
-          return (params.view === 'chromeless') ?
-                    'views/logs/chromeless_log.html' :
+          return params.view ?
+                    'views/logs/'+params.view+'_log.html' :
                     'views/logs/pod_log.html';
         }
       })

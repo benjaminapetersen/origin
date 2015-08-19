@@ -1,4 +1,3 @@
-<!-- <div ng-controller="ProjectController"  class="content"> -->
 <div class="content">
   <project-page>
     <div layout flex row class="page-header page-header-bleed-right">
@@ -12,7 +11,12 @@
     <alerts alerts="alerts"></alerts>
     <ng-include
       src="'/views/logs/_log_controls.html'"></ng-include>
+    <!-- -->
+    <ng-include
+      src="'/views/logs/_log_formatted.html'"></ng-include>
+    <!--
     <ng-include
       src="'/views/logs/_log.html'"></ng-include>
+    -->
   </project-page>
 </div>

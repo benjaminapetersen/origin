@@ -8,8 +8,16 @@
       <div
         ng-repeat="pod in pods | orderObjectsByDate : true"
         class="pod-well">
-        <div
-          ng-include="'/views/logs/_pod.html'"></div>
+        <div>
+           {{pod.metadata.name}}
+        </div>
+        <div>Containers:</div>
+        <div ng-repeat="container in pod.spec.containers">
+
+          <a href="/project/{{projectName}}/logs/pods/{{pod.metadata.name}}/log?container={{container.name}}">
+          - <strong>{{container.name}}</strong>, {{container.image | limitTo:50}}
+          </a>
+        </div>
       </div>
     </div>
   </project-page>

@@ -1,10 +1,36 @@
-<div
-  class="log-line"
-  ng-repeat="logLine in logList  | filter:logSearch"
-  ng-class-odd="'odd'"
-  ng-class-even="'even'"
-  style="border-bottom: 1px solid #F2F2F2;
-         padding: 2px;">
-  {{::$index+1 }}.&nbsp;&nbsp;{{::logLine.text}}
-  <a id="line_{{$index}}"></a>
+<div class="spinner" ng-show="!ready"></div>
+
+<div ng-show="ready">
+  <a id="#LogTop"></a>
+  <div class="log-view">
+    <div class="log-scroll">
+      <a
+        href="#LogBottom"
+        data-spy="affix"
+        data-offset-top="60"
+        data-offset-bottom="200">Go to end of log</a>
+    </div>
+    <div layout flex column class="log-view-output">
+      <div
+        layout row
+        class="log-line"
+        ng-repeat="logLine in logList  | filter:logSearch"
+        ng-class-odd="'odd'"
+        ng-class-even="'even'">
+
+        <span class="line-number">
+          {{:: $index+1 }}.
+        </span>
+        <span flex>
+        {{::logLine.text}}
+        </span>
+
+        <a id="line_{{$index}}"></a>
+      </div>
+    </div>
+    <div layout flex column cross-axis="end">
+      <a href="#LogTop">Go to start of log</a>
+    </div>
+  </div>
+  <a id="#LogBottom"></a>
 </div>
