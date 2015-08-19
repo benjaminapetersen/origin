@@ -2,11 +2,16 @@
 
 angular.module('openshiftConsole')
   .factory('logLinks', [
+    '$anchorScroll',
     '$location',
     '$window',
-    function($location, $window) {
+    function($anchorScroll, $location, $window) {
 
       return {
+        scrollTo: function(where) {
+          $location.hash(where);
+          $anchorScroll();
+        },
         fullPageLink: function() {
          $location
           .path($location.path())

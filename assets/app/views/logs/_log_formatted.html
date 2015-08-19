@@ -18,14 +18,18 @@
         ng-class-odd="'odd'"
         ng-class-even="'even'">
 
-        <span class="line-number">
-          {{:: $index+1 }}.
-        </span>
+        <a
+          class="line-number"
+          ng-click="scrollTo('line_'+$index)">
+          {{:: $index+1 }}. &nbsp;&nbsp;
+        </a>
         <span flex>
         {{::logLine.text}}
         </span>
 
-        <a id="line_{{$index}}"></a>
+        <a
+          name="line_{{$index}}"
+          id="line_{{$index}}"></a>
       </div>
     </div>
     <div layout flex column cross-axis="end">

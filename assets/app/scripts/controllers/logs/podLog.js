@@ -57,6 +57,7 @@ angular.module('openshiftConsole')
                   .then(function(log) {
                     angular.extend($scope, {
                       ready: true,
+                      scrollTo: logLinks.scrollTo,
                       goFull: logLinks.fullPageLink,
                       goChromeless: logLinks.chromelessLink,
                       goText: logLinks.textOnlyLink,
