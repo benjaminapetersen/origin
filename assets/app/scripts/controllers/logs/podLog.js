@@ -20,10 +20,9 @@ angular.module('openshiftConsole')
       // - what is actually needed in either context?
       var requestContext = {
         projectName: $routeParams.project,
-        projectPromise: $.Deferred(),
-        project: {},
-        projects: {},
-        alerts: {}
+        // in other contexts this is required and is made w/a jQuery deferred.
+        // it would be nice if it could be hidden away.
+        projectPromise: $.Deferred()
       };
 
       AuthService
@@ -57,41 +56,37 @@ angular.module('openshiftConsole')
                   .get('pods/log', $routeParams.pod, requestContext)
                   .then(function(log) {
                     angular.extend($scope, {
-                        // log is the log as a string.  this renders fine.
-                        log:  log ?
-                              _.reduce(
-                                log.split('\n'),
-                                function(memo, next, i, list) {
-                                  return (i < list.length) ?
-                                            memo + _.padRight(i+1+'. ', 7) + next + '\n' :
-                                            memo;
-                                },'') :
-                              'Error retrieving pod log',
-                        // log list is an array of log lines. Angular struggles with this.
-                        logList:  log ?
-                                  _.map(
-                                    log.split('\n'),
-                                    function(text) {
-                                      return {
-                                        text: text
-                                      }
-                                    }) :
-                                  [{text: 'Error retrieving pod log'}]
+                      ready: true,
+                      goFull: logLinks.fullPageLink,
+                      goChromeless: logLinks.chromelessLink,
+                      goText: logLinks.textOnlyLink,
+                      // optionally as a text string or array.
+                      // experimenting w/angular's ability to render...
+                      log:  log ?
+                            _.reduce(
+                              log.split('\n'),
+                              function(memo, next, i, list) {
+                                return (i < list.length) ?
+                                          memo + _.padRight(i+1+'. ', 7) + next + '\n' :
+                                          memo;
+                              },'') :
+                            'Error retrieving pod log',
+                      // log list is an array of log lines. Angular struggles with this.
+                      logList:  log ?
+                                _.map(
+                                  log.split('\n'),
+                                  function(text) {
+                                    return {
+                                      text: text
+                                    }
+                                  }) :
+                                [{text: 'Error retrieving pod log'}]
+                    });
+                    $timeout(function() {
+                      $anchorScroll();
                     });
                     return log;
                   });
-        })
-        .then(function() {
-          angular.extend($scope, {
-            ready: true,
-            goFull: logLinks.fullPageLink,
-            goChromeless: logLinks.chromelessLink,
-            goText: logLinks.textOnlyLink
-          });
-        }, function() {
-          angular.extend($scope, {
-            log: arguments[0]
-          })
         })
         .catch(function(err) {
           angular.extend($scope, {
