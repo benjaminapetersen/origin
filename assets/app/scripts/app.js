@@ -172,6 +172,7 @@ angular
         templateUrl: 'views/logs/builds.html'
       })
       .when('/project/:project/logs/builds/:build/log', {
+        controller: 'BuildLog',
         templateUrl: function(params) {
           return (params.view === 'chromeless') ?
                     'views/logs/chromeless_log.html' :

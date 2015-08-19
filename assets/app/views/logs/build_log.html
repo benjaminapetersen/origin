@@ -1,20 +1,18 @@
 <!-- <div ng-controller="ProjectController"  class="content"> -->
 <div class="content">
-    <div ng-controller="BuildLog">
-      <project-page>
-        <div layout flex row class="page-header page-header-bleed-right">
-          <div flex>
-            <h1>Build log for {{logName}}</h1>
-          </div>
-          <div flex cross-axis="end" column main-axis="center">
-            <button class="btn btn-default actions">View log archive</button>
-          </div>
-        </div>
-        <alerts alerts="alerts"></alerts>
-        <ng-include
-          src="'/views/logs/_log_controls.html'"></ng-include>
-        <ng-include
-          src="'/views/logs/_log.html'"></ng-include>
-      </project-page>
+  <project-page>
+    <div layout flex row class="page-header page-header-bleed-right">
+      <div flex>
+        <h1>Build log for {{logName}}</h1>
+      </div>
+      <div flex cross-axis="end" column main-axis="center">
+        <button class="btn btn-default actions">View log archive</button>
+      </div>
     </div>
+    <alerts alerts="alerts"></alerts>
+    <ng-include
+      src="'/views/logs/_log_controls.html'"></ng-include>
+    <ng-include
+      src="'/views/logs/_log.html'"></ng-include>
+  </project-page>
 </div>

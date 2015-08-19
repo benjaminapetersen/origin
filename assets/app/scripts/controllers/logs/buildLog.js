@@ -13,8 +13,10 @@ angular.module('openshiftConsole')
     'DataService',
     function($anchorScroll, $location, $q, $routeParams, $scope, $timeout, $window, AuthService, DataService) {
 
-      // what of this needs to go to the service to config the request,
-      // and what is actually for $scope, to go to view?
+      // TODO:
+      // - config goes to service to configure the request
+      // - $scope goes to view for rendering
+      // - what is actually needed in either context?
       var requestContext = {
         projectName: $routeParams.project,
         projectPromise: $.Deferred(),
@@ -52,12 +54,12 @@ angular.module('openshiftConsole')
         .then(function() {
           return DataService
                   .get('builds/log', $routeParams.build, requestContext)
-                  .then(function(buildLog) {
+                  .then(function(log) {
                     angular.extend($scope, {
                         // log is the log as a string.  this renders fine.
-                        log: buildLog ?
+                        log:  log ?
                               _.reduce(
-                                buildLog.split('\n'),
+                                log.split('\n'),
                                 function(memo, next, i, list) {
                                   return (i < list.length) ?
                                             memo + _.padRight(i+1+'. ', 7) + next + '\n' :
@@ -65,9 +67,9 @@ angular.module('openshiftConsole')
                                 },'') :
                               'Error retrieving pod log',
                         // log list is an array of log lines. Angular struggles with this.
-                        logList: buildLog ?
+                        logList:  log ?
                                   _.map(
-                                    buildLog.split('\n'),
+                                    log.split('\n'),
                                     function(text) {
                                       return {
                                         text: text
@@ -75,7 +77,7 @@ angular.module('openshiftConsole')
                                     }) :
                                   [{text: 'Error retrieving pod log'}]
                     });
-                    return buildLog;
+                    return log;
                   });
         })
         .then(function() {
