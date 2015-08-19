@@ -2,19 +2,14 @@
 
 angular.module('openshiftConsole')
   .controller('PodLog', [
-    '$log',
+    '$anchorScroll',
     '$location',
     '$q',
     '$routeParams',
     '$scope',
     '$window',
     'DataService',
-    'pods',
-    'podLogs',
-    function($log, $location, $q, $routeParams, $scope, $window, DataService, pods, podLogs) {
-      $log.log('project/:project/logs/pods/:pod/logs');
-
-
+    function($anchorScroll, $location, $q, $routeParams, $scope, $window, DataService) {
       $q
         .all([
           DataService
@@ -24,7 +19,6 @@ angular.module('openshiftConsole')
         ])
         .then(
           _.spread(function(pod, podLog) {
-
             angular.extend($scope, {
               ready: true,
               logName: pod.metadata.name,
@@ -71,9 +65,9 @@ angular.module('openshiftConsole')
               }
             });
 
-            _.delay(function() {
-              if($location.hash()) $anchorScroll();
-            });
+            // $timeout(function() {
+            //   if($location.hash()) $anchorScroll();
+            // },200);
 
           },
           function() {
@@ -87,11 +81,5 @@ angular.module('openshiftConsole')
               log: err
             });
           });
-
-
     }
   ]);
-
-
-
-
