@@ -14,14 +14,9 @@ angular.module('openshiftConsole')
     'logLinks',
     function($anchorScroll, $location, $q, $routeParams, $scope, $timeout, $window, AuthService, DataService, logLinks) {
 
-      // TODO:
-      // - config goes to service to configure the request
-      // - $scope goes to view for rendering
-      // - what is actually needed in either context?
       var requestContext = {
         projectName: $routeParams.project,
-        // in other contexts this is required and is made w/a jQuery deferred.
-        // it would be nice if it could be hidden away.
+        // TODO: possible to hide this away in the service?
         projectPromise: $.Deferred()
       };
 
