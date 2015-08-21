@@ -1,18 +1,16 @@
-<div class="spinner" ng-show="!ready"></div>
-
 <div ng-show="ready">
   <a id="#LogTop"></a>
   <div class="log-view">
     <div
-      class="log-scroll"
+      ng-show="logList.length > 40"
+      class="log-scroll log-scroll-top"
       affix
       offset-top="285"
-      offset-bottom="90"
-      style='border: 1px dashed #990000'>
-      <a href="#LogBottom"
-      style="border: 1px dotted #009900">Go to end of log</a>
+      offset-bottom="90">
+      <a href="#LogBottom">Go to end of log</a>
     </div>
     <div layout flex column class="log-view-output">
+      <div class="spinner spinner-inverse" ng-show="!ready"></div>
       <div
         layout row
         class="log-line"
@@ -20,21 +18,23 @@
         ng-class-odd="'odd'"
         ng-class-even="'even'">
 
-        <a
-          class="line-number"
+        <a class="log-line-number"
           ng-click="scrollTo('line_'+$index)">
-          {{:: $index+1 }}. &nbsp;&nbsp;
+          <span layout flex main-axis="end">
+          {{:: $index+1 }}
+          </span>
         </a>
-        <span flex>
+        <span flex class="log-line-text">
         {{::logLine.text}}
         </span>
-
         <a
           name="line_{{$index}}"
           id="line_{{$index}}"></a>
       </div>
     </div>
-    <div layout flex column cross-axis="end">
+    <div 
+      ng-show="logList.length > 40"
+      class="log-scroll log-scroll-bottom">
       <a href="#LogTop">Go to start of log</a>
     </div>
   </div>

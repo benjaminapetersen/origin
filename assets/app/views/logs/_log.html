@@ -1,5 +1,3 @@
-<div class="spinner" ng-show="!ready"></div>
-
 <div ng-show="ready">
   <a id="#LogTop"></a>
   <div class="log-view">
@@ -7,6 +5,7 @@
       <a href="#LogBottom">Go to end of log</a>
     </div>
     <div layout flex row class="log-view-output">
+      <div class="spinner spinner-inverse" ng-show="!ready"></div>
       <ng-include
         src="'/views/logs/_log_raw.html'"></ng-include>
       <!-- if we enable log filtering, this view will accommodate
