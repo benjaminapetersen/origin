@@ -16,10 +16,14 @@
       delete-policy="added"
       key-validation-tooltip="A valid object label has the form [domain/]name where a name is an alphanumeric (a-z, and 0-9) string, with a maximum length of 63 characters, with the '-' character allowed anywhere except the first or last character. A domain is a sequence of names separated by the '.' character with a maximum length of 253 characters."
       value-validation-tooltip="A valid label value is an alphanumeric (a-z, and 0-9) string, with a maximum length of 63 characters, with the '-' character allowed anywhere except the first or last character."
-      readonly-keys="template"
-      >
-
+      readonly-keys="template">
     </osc-key-values>
+
+    <osc-key-value-form
+      style="outline: 1px dashed #990000"
+      editable></osc-key-value-form>
+
+
   </div>
   <div ng-hide="expand">
     <osc-key-values

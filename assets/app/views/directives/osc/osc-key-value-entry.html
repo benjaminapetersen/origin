@@ -1,0 +1,34 @@
+<!--
+  attrs:
+  *********************************************
+  keyTitle:                   form placeholder
+  valueTitle:                 form placeholder
+  delimiter:                  unused....?
+  editable:                   form show/hide
+  key-validator:              ????
+  value-validator:            ????
+  delete-policy:              ???? - assume it goes to the list....
+  readonly-keys:              list items that cannot be edited
+  key-validation-tooltip:     form help on error
+  value-validation-tooltip:   form help on error
+  entries:                    the list of entries to publish / two-way
+-->
+<div column>
+
+  <osc-key-value-form
+    key-title="{{keyTitle}}"
+    value-title="{{valueTitle}}"
+    editable="{{editable}}"
+    key-validator="{{keyValidator}}"
+    value-validator="{{valueValidator}}"
+    key-valudation-tooltip="{{keyValidationTooltip}}"
+    value-validation-tooltip="{{valueValidationTooltip}}"></osc-key-value-form>
+    Stuff and things.
+  <osc-key-value-list
+    delimiter="{{delimiter}}"
+    delete-policy="{{deletePolicy}}"
+    entries="{{entries}}"
+    read-only-keys="{{readonlyKeys}}"></osc-key-value-list>
+
+</div>
+

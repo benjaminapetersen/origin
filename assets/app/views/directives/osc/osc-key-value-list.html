@@ -1,0 +1,46 @@
+<div column>
+
+  <div row ng-repeat="(key,value) in entries | valuesIn:readonlyKeys">
+    <div
+      flex grow="5" shrink="7"
+      class="key truncate" ng-attr-title="{{key}}">
+      read
+    </div>
+    <div
+      flex grow="5" shrink="7"
+      class="value truncate" ng-attr-title="{{value}}">
+      only
+    </div>
+    <div flex grow="2">&nbsp;</div>
+  </div>
+
+
+  <div row ng-repeat="(key,value) in entries | valuesNotIn:readonlyKeys">
+    <div
+      flex grow="5" shrink="7"
+       class="key truncate" ng-attr-title="{{key}}">
+       edit
+    </div>
+    <div
+      flex grow="5" shrink="7"
+      class="value truncate" ng-attr-title="{{value}}">
+      me
+    </div>
+    <div flex row grow="2" main-axis="end" cross-axis="center">
+      <a
+        class="btn btn-default btn-xs"
+        title="Edit"
+        href="#">
+        <i class="icon icon-pencil"></i>
+      </a>
+      <a
+        class="btn btn-default btn-xs"
+        title="Delete"
+        href="#">
+        <i class="fa fa-times"></i>
+      </a>
+    </div>
+  </div>
+
+
+</div>
