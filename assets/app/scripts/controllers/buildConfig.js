@@ -125,16 +125,23 @@ angular.module('openshiftConsole')
           });
         });
 
+
         $scope.startBuild = function(buildConfigName) {
-          BuildsService.startBuild(buildConfigName, context, $scope);
-        };
-
-        $scope.cancelBuild = function(build, buildConfigName) {
-          BuildsService.cancelBuild(build, buildConfigName, context, $scope);
-        };
-
-        $scope.cloneBuild = function(buildName) {
-          BuildsService.cloneBuild(buildName, context, $scope);
+          BuildsService
+            .startBuild(buildConfigName, context)
+            .then(function(build) {
+              $scope.alerts["create"] = {
+                type: "success",
+                message: "Build " + build.metadata.name + " has started.",
+                link: $filter('navigateResourceURL')(build)
+              };
+            }, function(result) {
+              $scope.alerts["create"] = {
+                type: "error",
+                message: "An error occurred while starting the build.",
+                details: $filter('getErrorDetails')(result)
+              };
+            });
         };
 
         $scope.$on('$destroy', function(){

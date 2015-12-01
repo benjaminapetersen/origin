@@ -4,6 +4,7 @@ angular.module("openshiftConsole")
   .factory("DeploymentsService", function(DataService, $filter, LabelFilter){
     function DeploymentsService() {}
 
+    // TODO: convert these methods to return promises & let controllers update $scope
     DeploymentsService.prototype.startLatestDeployment = function(deploymentConfig, context, $scope) {
       // increase latest version by one so starts new deployment based on latest
       var req = {

@@ -134,18 +134,6 @@ angular.module('openshiftConsole')
           }
         }
 
-        $scope.startBuild = function(buildConfigName) {
-          BuildsService.startBuild(buildConfigName, $scope, $scope); // FIXME
-        };
-
-        $scope.cancelBuild = function(build, buildConfigName) {
-          BuildsService.cancelBuild(build, buildConfigName, $scope, $scope); // FIXME
-        };
-
-        $scope.cloneBuild = function(buildName) {
-          BuildsService.cloneBuild(buildName, $scope, $scope); // FIXME
-        };
-
         LabelFilter.onActiveFiltersChanged(function(labelSelector) {
           // trigger a digest loop
           $scope.$apply(function() {

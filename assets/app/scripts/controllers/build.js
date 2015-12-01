@@ -114,16 +114,58 @@ angular.module('openshiftConsole')
             }
           }
         }));
+
         $scope.startBuild = function(buildConfigName) {
-          BuildsService.startBuild(buildConfigName, context, $scope);
+          BuildsService
+            .startBuild(buildConfigName, context)
+            .then(function(build) {
+              $scope.alerts["create"] = {
+                type: "success",
+                message: "Build " + build.metadata.name + " has started.",
+                link: $filter('navigateResourceURL')(build)
+              };
+            }, function(result) {
+              $scope.alerts["create"] = {
+                type: "error",
+                message: "An error occurred while starting the build.",
+                details: $filter('getErrorDetails')(result)
+              };
+            });
         };
 
         $scope.cancelBuild = function(build, buildConfigName) {
-          BuildsService.cancelBuild(build, buildConfigName, context, $scope);
+          BuildsService
+            .cancelBuild(build, buildConfigName, context)
+            .then(function() {
+              $scope.alerts["cancel"] = {
+                type: "success",
+                message: "Cancelling build " + build.metadata.name + " of " + buildConfigName + "."
+              };
+            }, function(result) {
+              $scope.alerts["cancel"] = {
+                type: "error",
+                message: "An error occurred cancelling the build.",
+                details: $filter('getErrorDetails')(result)
+              };
+            });
         };
 
         $scope.cloneBuild = function(buildName) {
-          BuildsService.cloneBuild(buildName, context, $scope);
+          BuildsService
+            .cloneBuild(buildName, context)
+            .then(function(build) {
+              $scope.alerts["rebuild"] = {
+                type: "success",
+                message: "Build " + buildName + " is being rebuilt as " + build.metadata.name + ".",
+                link: $filter('navigateResourceURL')(build)
+              };
+            }, function(result) {
+              $scope.alerts["rebuild"] = {
+                type: "error",
+                message: "An error occurred while rerunning the build.",
+                details: $filter('getErrorDetails')(result)
+              };
+            });
         };
 
         $scope.$on('$destroy', function(){
