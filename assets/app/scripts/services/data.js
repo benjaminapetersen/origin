@@ -385,11 +385,6 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
      return getNamespace(kind, context, {})
                 .then(function(params) {
                   var cumulativeBytes = 0;
-
-                  console.log('urlForResource', APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)));
-                  console.log(APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)).toString());
-                  return;
-
                   return  $ws({
                             url: APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)),
                             auth: {},

@@ -5,6 +5,39 @@
 // To change configuration for local development, copy this file to
 // assets/app/config.local.js and edit the copy.
 window.OPENSHIFT_CONFIG = {
+  // pototype of future api groups,
+  // this is subject to change!
+  "groupVersions" : [
+      {
+        "group":      "",
+        "version":    "v1",
+        "hostPort":   "localhost:8443",
+        "prefix":     "/oapi",
+        "resources":  ["builds","buildconfigs", "deploymentconfigs", "imagestreams", "other", "things"]
+      },
+      {
+        "group":      "",
+        "version":    "v1",
+        "hostPort":   "localhost:8443",
+        "prefix":     "/api",
+        "resources":  ["pods", "namespaces", "podtemplates", "replicationcontrollers"]
+      },
+      {
+        "group":      "extensions",
+        "version":    "v1beta1",
+        "hostPort":   "localhost:8443",
+        "prefix":     "/apis",
+        "resources":  ["jobs", ""]
+      },
+      {
+        "group" :       "experimental",
+        "version" :     "v1beta1",
+        "hostPort" :    "localhost:8443",
+        "prefix" :      "/apis",
+        "resources" :   ["horizontalpodautoscalers"]
+      }
+  ],
+
   api: {
     openshift: {
       hostPort: "localhost:8443",

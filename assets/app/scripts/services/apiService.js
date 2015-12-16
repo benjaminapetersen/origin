@@ -105,7 +105,7 @@ angular.module('openshiftConsole')
                 "https";
     };
 
-    var URL_ROOT_TEMPLATE         = "{protocol}://{+serverUrl}{+apiPrefix}/{apiVersion}/";
+    var URL_ROOT_TEMPLATE         = "{protocol}://{+hostPort}{+prefix}/{version}/";
     var URL_GET_LIST              = URL_ROOT_TEMPLATE + "{resource}{?q*}";
     var URL_OBJECT                = URL_ROOT_TEMPLATE + "{resource}/{name}{/subresource*}{?q*}";
     var URL_NAMESPACED_GET_LIST   = URL_ROOT_TEMPLATE + "namespaces/{namespace}/{resource}{?q*}";
@@ -138,21 +138,24 @@ angular.module('openshiftConsole')
     };
 
     // build the actual url for the resource
-    var urlForResource = function(resource, name, apiVersion, context, isWebsocket, params) {
-      var info = resourceInfo(resource, apiVersion);
+    var urlForResource = function(resourceWithSubresource, name, apiVersion, context, isWebsocket, params) {
       var namespace = findNamespace(context, params);
+      var resource = _.first(resourceWithSubresource.split('/'));
+      var subresource = _.rest(resourceWithSubresource.split('/'));
+      var info = resourceInfo(resource, apiVersion);
 
       if (!info) {
         Logger.error("urlForResource called with unknown resource", resource, arguments);
         return null;
       }
+
       return URI.expand(findTemplateFor(name, namespace), {
                 protocol: protocol(isWebsocket),
-                serverUrl: info.hostPort,
-                apiPrefix: info.prefix,
-                apiVersion: info.apiVersion,
-                resource: _.first(resource.split('/')),
-                subresource: _.rest(resource.split('/')),
+                hostPort: info.hostPort,
+                prefix: info.prefix,
+                version: info.apiVersion,
+                resource: resource,
+                subresource: subresource,
                 name: name,
                 namespace: namespace,
                 q: cleanCopyParams(params)

@@ -75,7 +75,6 @@ angular.module('openshiftConsole')
                 // use the new config & transform to the new map
                 mapApis(window.OPENSHIFT_CONFIG.groupVersions);
 
-    console.log('apis', apis);
     // finds the api via spec, must have a full spec to work
     var apiForResource = function(spec) {
         return apis[spec.group] && apis[spec.group][spec.version] && apis[spec.group][spec.version][spec.resource];
@@ -218,7 +217,7 @@ angular.module('openshiftConsole')
                  null;
     };
 
-    // TODO: name, namespace are where?
+
     var templateOptions = function(spec, name, namespace, isWebsocket, params) {
       return _.extend(
               {
@@ -232,26 +231,30 @@ angular.module('openshiftConsole')
               {q: cleanCopyParams(params)});
     };
 
+
     // PATCH old url request format:
     //  DataService.get("pods", $routeParams.pod, context)
-    var makeUrl_Legacy = function(resource, name, apiVersion, context, isWebsocket, params) {
-      return URI
-              .expand(
-                findTemplateFor(name, findNamespace(context, params), ''),
-                // TODO: legacy version? spec != resource... resource is a string, spec is an object
-                // transform resource to a spec string here?  find version/default version?
-                // group is nothing? d
-                templateOptions({
-                    resource:resource,
-                    // NOTE: legacy does not support other versions or groups.
-                    group:"",
-                    version:"v1"
-                  },
-                  name,
-                  findNamespace(context, params),
-                  isWebsocket,
-                  params));
+    var makeUrl_Legacy = function(resourceWithSubresource, name, apiVersion, context, isWebsocket, params) {
+        var namespace = findNamespace(context, params);
+        var resource = _.first(resourceWithSubresource.split('/'));
+        var subresource = _.rest(resourceWithSubresource.split('/'));
 
+        return URI
+                .expand(
+                  findTemplateFor(name, namespace, ''),
+                  _.extend({}, findApiForResource({
+                      resource: resource,
+                      // NOTE: legacy does not support other versions or groups.
+                      group:"",
+                      version:"v1"
+                    }), {
+                      resource: resource,
+                      subresource: subresource,
+                      name: name,
+                      namespace: namespace,
+                      protocol: protocol(isWebsocket),
+                      q: cleanCopyParams(params)
+                    }));
     };
 
     // New url request format:
