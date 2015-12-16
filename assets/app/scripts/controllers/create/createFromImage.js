@@ -6,6 +6,7 @@ angular.module("openshiftConsole")
       $q,
       $routeParams,
       DataService,
+      ApiEndpointService,
       ProjectsService,
       Navigate,
       ApplicationGenerator,
@@ -120,7 +121,7 @@ angular.module("openshiftConsole")
           }
 
           resources.forEach(function(resource) {
-            var resourceName = DataService.kindToResource(resource.kind);
+            var resourceName = ApiEndpointService.kindToResource(resource.kind);
             if (!resourceName) {
               failureResults.push({data: {message: "Unrecognized kind: " + resource.kind + "."}});
               remaining--;

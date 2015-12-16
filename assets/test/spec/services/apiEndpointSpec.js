@@ -1,11 +1,11 @@
 "use strict";
 
-describe("DataService", function(){
-  var DataService;
+describe("ApiEndpointService", function(){
+  var ApiEndpointService;
 
   beforeEach(function(){
-    inject(function(_DataService_){
-      DataService = _DataService_;
+    inject(function(_ApiEndpointService_){
+      ApiEndpointService = _ApiEndpointService_;
     });
   });
 
@@ -83,7 +83,7 @@ describe("DataService", function(){
 
     angular.forEach(tc, function(item) {
       it('should generate a correct URL for ' + JSON.stringify(item[0]), function() {
-        expect(DataService.url(item[0])).toEqual(item[1]);
+        expect(ApiEndpointService.url(item[0])).toEqual(item[1]);
       });
     });
 

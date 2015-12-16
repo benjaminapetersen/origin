@@ -8,9 +8,9 @@
  * Controller of the openshiftConsole
  */
 angular.module('openshiftConsoleExtensions', ['openshiftConsole'])
-  .factory("ProxyPod", function(DataService) {
+  .factory("ProxyPod", function(ApiEndpointService) {
     return function(namespace, podName, port) {
-      return new URI(DataService.url({
+      return new URI(ApiEndpointService.url({
         resource: 'pods/proxy',
         // always use https when connecting to jolokia in a pod
         name: ['https', podName, port || ''].join(':'),
