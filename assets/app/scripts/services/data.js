@@ -2,11 +2,11 @@
 /* jshint eqeqeq: false, unused: false, expr: true */
 
 angular.module('openshiftConsole')
-.factory('DataService', function($http, $ws, $rootScope, $q, ApiEndpointService, ApiEndpointService_v2, Notification, Logger, $timeout) {
+.factory('DataService', function($http, $ws, $rootScope, $q, APIService, APIService_v2, Notification, Logger, $timeout) {
 
   // OVERRIDE, can swap back and forth between new/old impl by commenting out this line.
   // NOTE: apiEndpointService is used in other places, this will not completely replace.
-  ApiEndpointService = ApiEndpointService_v2;
+  APIService = APIService_v2;
 
   function Data(array) {
     this._data = {};
@@ -107,7 +107,7 @@ angular.module('openshiftConsole')
 //                    by attribute (e.g. data.by('metadata.name'))
 // opts:      options (currently none, placeholder)
   DataService.prototype.list = function(resource, context, callback, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     var callbacks = this._listCallbacks(resource, context);
     callbacks.add(callback);
 
@@ -131,7 +131,7 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.delete = function(resource, name, context, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
@@ -139,7 +139,7 @@ angular.module('openshiftConsole')
       $http(angular.extend({
         method: 'DELETE',
         auth: {},
-        url: ApiEndpointService.urlForResource(resource, name, null, context, false, ns)
+        url: APIService.urlForResource(resource, name, null, context, false, ns)
       }, opts.http || {}))
       .success(function(data, status, headerFunc, config, statusText) {
         deferred.resolve(data);
@@ -163,7 +163,7 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.update = function(resource, name, object, context, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
@@ -172,7 +172,7 @@ angular.module('openshiftConsole')
         method: 'PUT',
         auth: {},
         data: object,
-        url: ApiEndpointService.urlForResource(resource, name, object.apiVersion, context, false, ns)
+        url: APIService.urlForResource(resource, name, object.apiVersion, context, false, ns)
       }, opts.http || {}))
       .success(function(data, status, headerFunc, config, statusText) {
         deferred.resolve(data);
@@ -197,7 +197,7 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.create = function(resource, name, object, context, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
@@ -206,7 +206,7 @@ angular.module('openshiftConsole')
         method: 'POST',
         auth: {},
         data: object,
-        url: ApiEndpointService.urlForResource(resource, name, object.apiVersion, context, false, ns)
+        url: APIService.urlForResource(resource, name, object.apiVersion, context, false, ns)
       }, opts.http || {}))
       .success(function(data, status, headerFunc, config, statusText) {
         deferred.resolve(data);
@@ -243,7 +243,7 @@ angular.module('openshiftConsole')
     }
 
     objects.forEach(function(object) {
-      var resource = self.ApiEndpointService.kindToResource(object.kind);
+      var resource = APIService.kindToResource(object.kind);
       if (!resource) {
         failureResults.push({
           data: {message: "Unrecognized kind " + object.kind}
@@ -253,7 +253,7 @@ angular.module('openshiftConsole')
         return;
       }
 
-      if (!ApiEndpointService.apiExistsFor(resource, object.apiVersion)) {
+      if (!APIService.apiExistsFor(resource, object.apiVersion)) {
         failureResults.push({
           data: {message: "Unknown API version "+object.apiVersion+" for kind " + object.kind}
         });
@@ -285,7 +285,7 @@ angular.module('openshiftConsole')
 //            http - options to pass to the inner $http call
 //            errorNotification - will popup an error notification if the API request fails (default true)
   DataService.prototype.get = function(resource, name, context, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
 
     var force = !!opts.force;
@@ -326,7 +326,7 @@ angular.module('openshiftConsole')
         $http(angular.extend({
           method: 'GET',
           auth: {},
-          url: ApiEndpointService.urlForResource(resource, name, null, context, false, ns)
+          url: APIService.urlForResource(resource, name, null, context, false, ns)
         }, opts.http || {}))
         .success(function(data, status, headerFunc, config, statusText) {
           if (self._isResourceCached(resource)) {
@@ -370,10 +370,9 @@ function b64_to_utf8( str ) {
 // TODO (bpeterse): Create a new Streamer service & get this out of DataService.
 DataService.prototype.createStream = function(kind, name, context, opts, isRaw) {
   var getNamespace = this._getNamespace.bind(this);
-  var urlForResource = ApiEndpointService.urlForResource.bind(this);
-  kind = this.ApiEndpointService.kindToResource(kind) ?
-              this.ApiEndpointService.kindToResource(kind) :
-              ApiEndpointService.normalizeResource(kind);
+  kind = APIService.kindToResource(kind) ?
+              APIService.kindToResource(kind) :
+              APIService.normalizeResource(kind);
   var protocols = isRaw ? 'binary.k8s.io' : 'base64.binary.k8s.io';
   var identifier = 'stream_';
   var openQueue = {};
@@ -386,8 +385,13 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
      return getNamespace(kind, context, {})
                 .then(function(params) {
                   var cumulativeBytes = 0;
+
+                  console.log('urlForResource', APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)));
+                  console.log(APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)).toString());
+                  return;
+
                   return  $ws({
-                            url: urlForResource(kind, name, null, context, true, _.extend(params, opts)),
+                            url: APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)),
                             auth: {},
                             onopen: function(evt) {
                               _.each(openQueue, function(fn) {
@@ -509,7 +513,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 //        var handle = DataService.watch(resource,context,callback[,opts])
 //        DataService.unwatch(handle)
   DataService.prototype.watch = function(resource, context, callback, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
 
     if (callback) {
@@ -586,7 +590,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 //        var handle = DataService.watch(resource,context,callback[,opts])
 //        DataService.unwatch(handle)
   DataService.prototype.watchObject = function(resource, name, context, callback, opts) {
-    resource = ApiEndpointService.normalizeResource(resource);
+    resource = APIService.normalizeResource(resource);
     opts = opts || {};
 
     var wrapperCallback;
@@ -855,7 +859,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
         $http({
           method: 'GET',
           auth: {},
-          url: ApiEndpointService.urlForResource(resource, null, null, context, false, {namespace: project.metadata.name})
+          url: APIService.urlForResource(resource, null, null, context, false, {namespace: project.metadata.name})
         }).success(function(data, status, headerFunc, config, statusText) {
           self._listOpComplete(resource, context, data);
         }).error(function(data, status, headers, config) {
@@ -872,7 +876,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       $http({
         method: 'GET',
         auth: {},
-        url: ApiEndpointService.urlForResource(resource, null, null, context),
+        url: APIService.urlForResource(resource, null, null, context),
       }).success(function(data, status, headerFunc, config, statusText) {
         self._listOpComplete(resource, context, data);
       }).error(function(data, status, headers, config) {
@@ -942,7 +946,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
           params.namespace = project.metadata.name;
           $ws({
             method: "WATCH",
-            url: ApiEndpointService.urlForResource(resource, null, null, context, true, params),
+            url: APIService.urlForResource(resource, null, null, context, true, params),
             auth:      {},
             onclose:   $.proxy(self, "_watchOpOnClose",   resource, context),
             onmessage: $.proxy(self, "_watchOpOnMessage", resource, context),
@@ -956,7 +960,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       else {
         $ws({
           method: "WATCH",
-          url: ApiEndpointService.urlForResource(resource, null, null, context, true, params),
+          url: APIService.urlForResource(resource, null, null, context, true, params),
           auth:      {},
           onclose:   $.proxy(self, "_watchOpOnClose",   resource, context),
           onmessage: $.proxy(self, "_watchOpOnMessage", resource, context),

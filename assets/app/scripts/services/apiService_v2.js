@@ -5,7 +5,7 @@
 // for discussion leading up to the creation of this file
 
 angular.module('openshiftConsole')
-  .factory('ApiEndpointService_v2', function(API_CFG) {
+  .factory('APIService_v2', function(API_CFG) {
 
     // defaultVersion lookup for backwards compatibility...
     var defaultVersionByGroup = {
@@ -20,9 +20,10 @@ angular.module('openshiftConsole')
               groupVersions,
               function(memo, next) {
                 if(!memo[next.group]) {
-                  memo[next.group] = {};
+                  memo[next.group] = {
+                    defaultVersion: defaultVersionByGroup[next.group]
+                  };
                 }
-                memo[next.group].defaultVersion = defaultVersionByGroup[next.group];
                 if(!memo[next.group][next.version]) {
                   memo[next.group][next.version] = {};
                 }

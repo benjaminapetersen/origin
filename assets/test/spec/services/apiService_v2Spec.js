@@ -1,7 +1,7 @@
 'use strict';
 
-describe('ApiEndpointService_v2', function() {
-    var ApiEndpoint;
+describe('APIService_v2', function() {
+    var APIService;
     // TODO: this will eventually be the new API_CFG defined in config.js
     var apiStub = {
       "groupVersions": [
@@ -35,7 +35,7 @@ describe('ApiEndpointService_v2', function() {
           }
       ]
     };
-    // ApiEndpoint.mapApis() should turn above into this, so that you can do
+    // APIService.mapApis() should turn above into this, so that you can do
     // urlForResource(group, version, resource, ....) to get the needed data.
     // {
     //     "": {
@@ -63,19 +63,19 @@ describe('ApiEndpointService_v2', function() {
     // }
     //
     beforeEach(function() {
-      inject(function(_ApiEndpointService_v2_) {
-        ApiEndpoint = _ApiEndpointService_v2_;
+      inject(function(_APIService_v2_) {
+        APIService = _APIService_v2_;
       });
     });
 
     describe('#mapApis', function() {
       it('should create a map of top level groups', function() {
-        var map = ApiEndpoint.mapApis(apiStub.groupVersions);
+        var map = APIService.mapApis(apiStub.groupVersions);
         var groups = _.keys(map);
         expect(groups).toEqual(['', 'extensions', 'experimental']);
       });
       it('should assign versions to groups', function() {
-        var map = ApiEndpoint.mapApis(apiStub.groupVersions);
+        var map = APIService.mapApis(apiStub.groupVersions);
         var versions = _.uniq(
                         _.reduce(
                           map,
@@ -86,7 +86,7 @@ describe('ApiEndpointService_v2', function() {
         expect(versions).toEqual(['v1', 'v1beta1']);
       });
       it('should assign resources to versions under groups', function() {
-        var map = ApiEndpoint.mapApis(apiStub.groupVersions);
+        var map = APIService.mapApis(apiStub.groupVersions);
         // var builds = _.pluck(_.pluck(_.pluck(map, ''), 'v1'), 'builds');
         // expect(builds.hostport).toEqual('localhost:8443');
         // expect(builds.prefix).toEqual('/oapi');
@@ -110,7 +110,7 @@ describe('ApiEndpointService_v2', function() {
 
     describe('#urlForResource', function() {
       it('should build an appropriate url for given args', function() {
-        //var map = ApiEndpoint.mapApis(apiStub.groupVersions);
+        //var map = APIService.mapApis(apiStub.groupVersions);
         //var first = _.first(map);
       });
     });

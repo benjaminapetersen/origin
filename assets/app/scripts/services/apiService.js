@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('openshiftConsole')
-  .factory('ApiEndpointService', function(API_CFG) {
+  .factory('APIService', function(API_CFG) {
 
     // TODO: prob should not modify the config data,
     // instead keep this as local vars?
@@ -129,12 +129,12 @@ angular.module('openshiftConsole')
 
     var findNamespace = function(context, params) {
       return (params && params.namespace) ?
-              params.namespace :
-              (context && context.namespace) ?
-                context.namespace :
-                (context && context.project) ?
-                 context.project.metadata.name :
-                 null;
+                params.namespace :
+                (context && context.namespace) ?
+                  context.namespace :
+                  (context && context.project) ?
+                    context.project.metadata.name :
+                    null;
     };
 
     // build the actual url for the resource
@@ -178,12 +178,12 @@ angular.module('openshiftConsole')
         return null;
       };
 
-    // ApiEndpointService.normalizeResource()
-    // ApiEndpointService.kindToResource()
-    // ApiEndpointService.apiExistsFor()
-    // ApiEndpointService.openshiftAPIBaseUrl()
-    // ApiEndpointService.urlForResource()
-    // ApiEndpointService.url()
+    // APIService.normalizeResource()
+    // APIService.kindToResource()
+    // APIService.apiExistsFor()
+    // APIService.openshiftAPIBaseUrl()
+    // APIService.urlForResource()
+    // APIService.url()
     return {
       normalizeResource: normalizeResource,       // DataService.js
       kindToResource: kindToResource,             // DataService.js, createFromImage.js
