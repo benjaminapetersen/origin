@@ -1,13 +1,77 @@
 'use strict';
+/* jshint unused:false */
+
+// see gist: https://gist.github.com/benjaminapetersen/540ac605d3c1b0660062
+// for discussion leading up to the creation of this file
 
 angular.module('openshiftConsole')
-  .factory('APIService', function(API_CFG) {
+  .factory('APIService', function(API_CFG, APIGROUP_CFG) {
 
-    // TODO: prob should not modify the config data,
-    // instead keep this as local vars?
-    // var defaultVersion = { os: 'v1', k8s: 'v1' }
-    API_CFG.openshift.defaultVersion = "v1";
-    API_CFG.k8s.defaultVersion = "v1";
+
+    var defaultVersionForGroup = {
+      'extensions':   'v1beta1',
+      'experimental': 'v1beta1',
+      '':             'v1'  // this group applies to legacy openshift & k8s (/oapi & /api)
+    };
+
+
+    // {group: '', resource: '', version: ''}
+    var findAPIFor = function(qualified) {
+      var resource = qualified.resource;
+      if(qualified.group && qualified.group.length) {
+        // TODO: need to validate?
+        return {
+          hostPort: APIGROUP_CFG[qualified.group].hostPort,
+          prefix: APIGROUP_CFG[qualified.group].prefixes[qualified.version],
+          version: qualified.version || defaultVersionForGroup[qualified.group]
+        };
+      }
+      var found = _.find(API_CFG, function(api) {
+        return api.resources[_.first(resource.split('/'))];
+      });
+
+      return {
+        hostPort: found.hostPort,
+        prefix: found.prefixes[qualified.version] || found.prefixes[defaultVersionForGroup[qualified.group]],
+        version: qualified.version || defaultVersionForGroup[qualified.group]
+      }
+    };
+
+
+    // URITemplate has no ability to do conditional {+group}, so templates are now broken up
+    var API_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{version}/";
+    var API_GROUP_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{+group}/{version}/";
+
+    var URL_GET_LIST              = "{resource}{?q*}";
+    var URL_OBJECT                = "{resource}/{name}{/subresource*}{?q*}";
+    var URL_NAMESPACED_GET_LIST   = "namespaces/{namespace}/{resource}{?q*}";
+    var URL_NAMESPACED_OBJECT     = "namespaces/{namespace}/{resource}/{name}{/subresource*}{?q*}";
+
+
+    var findTemplateFor = function(name, namespace, group) {
+      var base = group ? API_GROUP_TEMPLATE : API_TEMPLATE;
+      var rest = namespace ? URL_NAMESPACED_GET_LIST : URL_GET_LIST;
+      if(name) {
+        rest = namespace ? URL_NAMESPACED_OBJECT : URL_OBJECT;
+      }
+      return (base + rest);
+    };
+
+
+    var protocol = function(isWebsocket) {
+      if(isWebsocket) {
+        return window.location.protocol === "http:" ?  "ws" : "wss";
+      }
+      return window.location.protocol === "http:" ? "http" : "https";
+    };
+
+
+    var cleanCopyParams = function(params) {
+      params = (params &&  angular.copy(params)) || {};
+      delete params.namespace;
+      return params;
+    };
+
 
     // generates something like:
     // https://localhost:8443
@@ -17,6 +81,15 @@ angular.module('openshiftConsole')
       return new URI({protocol: protocol, hostname: hostPort}).toString();
     };
 
+    // TODO: can this be implmeneted in a meangful way at this point?
+    var resourceInfo = function(resource) {
+      console.warn('TODO: resourceInfo is not implemented....!', !!findAPIFor(qualifyResource(resource)));
+      return !!findAPIFor(qualifyResource(resource));
+    }
+
+
+    // port of restmapper.go#normalizeResource
+    // TODO: upate to match the current go version func of the same name
     var normalizeResource = function(resource) {
        if (!resource) {
         return;
@@ -33,7 +106,9 @@ angular.module('openshiftConsole')
        return normalized;
     };
 
-    // port of restmapper.go#kindToResource
+
+    // port of restmapper.go#kindToResource,
+    // TODO: upate to match the current go version func of the same name
     var kindToResource = function(kind) {
       if (!kind) {
         return "";
@@ -48,119 +123,69 @@ angular.module('openshiftConsole')
       } else {
         resource = resource + 's';
       }
-      // make sure it is a known resource
-      if (!resourceInfo(resource)) {
-        Logger.warn('Unknown resource "' + resource + '"');
-        return undefined;
-      }
+      // NOTE: previously had a check here for a 'known resource'
       return resource;
     };
 
-    var apiExistsFor = function(resource, apiVersion) {
-      return !!resourceInfo(resource, apiVersion);
+
+    // if resource is string will convert to the newer object structure {resource: '', group: '', version: ''}
+    // TODO: ensure kindToResouce() has been handed already...
+    var qualifyResource = function(resourceWithSubresource, apiVersion) {
+
+      if(!resourceWithSubresource) {
+        return;
+      }
+      var qualified = _.isString(resourceWithSubresource) ? { resource: resourceWithSubresource } : _.clone(resourceWithSubresource); // clone for manipulation
+
+      //qualified.resource = kindToResource(qualified.kind || resource);
+      //qualified.resource = normalizeResource((qualified.kind && kindToResource(qualified.kind)) || qualified.resource);
+      qualified.resource = normalizeResource(qualified.kind || qualified.resource);
+
+      if(!qualified.group) {
+        qualified.group = '';
+      }
+      if(!qualified.version) {
+        qualified.version = apiVersion || defaultVersionForGroup[qualified.group];
+      }
+      delete qualified.version; // apiVersion
+      delete qualified.kind;
+      return qualified;
     };
 
-    var ensureVersion = function(api, preferredAPIVersion) {
-      return preferredAPIVersion || (api && api.defaultVersion);
+    // This function should be used by Data.js in situations where the resource is undefined/null:
+    //  DataService.update(null, 'foo', data)
+    //    .update() can internally call apiService.deriveResource(data)
+    //    to get object {resource: '', group:'', version: ''} needed to submit
+    // This will not work for GET as there is no data object being sent, but would work for POST, etc
+    var deriveResource = function(data) {
+      var parts = data.apiVersion && data.apiVersion.split('/') || [];
+      var group = data.group || _.first(parts);
+      var version = data.version || _.rest(parts);
+      // in this case, we have a legacy apiVersion
+      if(parts.length === 1) {
+        version = parts;
+        group = '';
+      }
+      return {
+        resource:  (data.kind && kindToResource(data.kind)) || data.resource,
+        group: group || '',
+        version: (version && version[0]) || defaultVersionForGroup[group]
+      };
     };
 
-    // find the api object for the relevant resource from the API_CFG
-    var findApiForResource = function(resource, preferredAPIVersion) {
-      return _.find(API_CFG, function(api) {
-              var apiVersion = ensureVersion(api, preferredAPIVersion);
-              var prefix = api.prefixes[apiVersion] || api.prefixes['*'];
-              if (!api.resources[resource] && !api.resources['*']) {
-                return;
-              }
-              if (!prefix) {
-                return;
-              }
-              return true;
-            });
-    };
-
-    // transforms the api object for a resource into the format
-    // that is used to generate a url for the resource
-    var resourceInfo = function(resource, preferredAPIVersion) {
-      return (function(api) {
-        var apiVersion = ensureVersion(api, preferredAPIVersion);
-        return api ?
-                  {
-                    hostPort:   api.hostPort,
-                    prefix:     api.prefixes[apiVersion] || api.prefixes['*'],
-                    apiVersion: apiVersion
-                  } :
-                  undefined;
-      })(findApiForResource(resource, preferredAPIVersion));
-    };
-
-
-    var protocol = function(isWebsocket) {
-      return isWebsocket ?
-              window.location.protocol === "http:" ?
-                "ws" :
-                "wss" :
-              window.location.protocol === "http:" ?
-                "http" :
-                "https";
-    };
-
-    var URL_ROOT_TEMPLATE         = "{protocol}://{+hostPort}{+prefix}/{version}/";
-    var URL_GET_LIST              = URL_ROOT_TEMPLATE + "{resource}{?q*}";
-    var URL_OBJECT                = URL_ROOT_TEMPLATE + "{resource}/{name}{/subresource*}{?q*}";
-    var URL_NAMESPACED_GET_LIST   = URL_ROOT_TEMPLATE + "namespaces/{namespace}/{resource}{?q*}";
-    var URL_NAMESPACED_OBJECT     = URL_ROOT_TEMPLATE + "namespaces/{namespace}/{resource}/{name}{/subresource*}{?q*}";
-
-    var findTemplateFor = function(name, namespace) {
-      return name ?
-              namespace ?
-                URL_NAMESPACED_OBJECT :
-                URL_OBJECT :
-              namespace ?
-                URL_NAMESPACED_GET_LIST :
-                URL_GET_LIST;
-    };
-
-    var cleanCopyParams = function(params) {
-      params = (params &&  angular.copy(params)) || {};
-      delete params.namespace;
-      return params;
-    };
 
     var findNamespace = function(context, params) {
-      return (params && params.namespace) ?
-                params.namespace :
-                (context && context.namespace) ?
-                  context.namespace :
-                  (context && context.project) ?
-                    context.project.metadata.name :
-                    null;
-    };
-
-    // build the actual url for the resource
-    var urlForResource = function(resourceWithSubresource, name, apiVersion, context, isWebsocket, params) {
-      var namespace = findNamespace(context, params);
-      var resource = _.first(resourceWithSubresource.split('/'));
-      var subresource = _.rest(resourceWithSubresource.split('/'));
-      var info = resourceInfo(resource, apiVersion);
-
-      if (!info) {
-        Logger.error("urlForResource called with unknown resource", resource, arguments);
-        return null;
+      if(params && params.namespace) {
+        return params.namespace;
       }
-
-      return URI.expand(findTemplateFor(name, namespace), {
-                protocol: protocol(isWebsocket),
-                hostPort: info.hostPort,
-                prefix: info.prefix,
-                version: info.apiVersion,
-                resource: resource,
-                subresource: subresource,
-                name: name,
-                namespace: namespace,
-                q: cleanCopyParams(params)
-              });
+      if(context && context.namespace) {
+        return context.namespace;
+      }
+      if(context && context.project) {
+        return context.project.metadata.name;
+      }
     };
+
 
     // NOTE: this is used in 2 places in app,
     // and is really just a proxy for urlForResource w/a
@@ -181,13 +206,35 @@ angular.module('openshiftConsole')
         return null;
       };
 
-    // APIService.normalizeResource()
-    // APIService.kindToResource()
-    // APIService.apiExistsFor()
-    // APIService.openshiftAPIBaseUrl()
-    // APIService.urlForResource()
-    // APIService.url()
+
+    var urlForResource = function(unqualifiedResource, name, apiVersion, context, isWebsocket, params) {
+      var qualified = qualifyResource(unqualifiedResource, apiVersion);
+      var namespace = findNamespace(context, params);
+      return URI
+              .expand(
+                findTemplateFor(name, namespace, qualified.group),
+                _.extend({}, qualified, findAPIFor(qualified), {
+                  resource: _.first(qualified.resource.split('/')),
+                  subresource: _.rest(qualified.resource.split('/')),
+                  name: name,
+                  namespace: namespace,
+                  q: cleanCopyParams(params),
+                  protocol: protocol(isWebsocket)
+                }));
+    };
+
+
+    // TODO: is this resource+group+version valid for the server
+    // is not something we can implement until we have discovery ready to
+    // get a better API config.
+    var apiExistsFor = function() {
+      console.warn('apiExistsFor() is not yet implemented');
+    };
+
+
     return {
+      qualifyResource: qualifyResource,
+      deriveResource: deriveResource,             // DataService.js (future impl)
       normalizeResource: normalizeResource,       // DataService.js
       kindToResource: kindToResource,             // DataService.js, createFromImage.js
       apiExistsFor: apiExistsFor,                 // DataService.js
@@ -195,4 +242,5 @@ angular.module('openshiftConsole')
       urlForResource: urlForResource,             // DataService.js
       url: url                                    // javaLink.js, resources.js
     };
+
   });

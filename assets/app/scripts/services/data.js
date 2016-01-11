@@ -2,11 +2,7 @@
 /* jshint eqeqeq: false, unused: false, expr: true */
 
 angular.module('openshiftConsole')
-.factory('DataService', function($http, $ws, $rootScope, $q, APIService, APIService_v2, Notification, Logger, $timeout) {
-
-  // OVERRIDE, can swap back and forth between new/old impl by commenting out this line.
-  // NOTE: apiEndpointService is used in other places, this will not completely replace.
-  APIService = APIService_v2;
+.factory('DataService', function($http, $ws, $rootScope, $q, APIService,  Notification, Logger, $timeout) {
 
   function Data(array) {
     this._data = {};
@@ -107,21 +103,22 @@ angular.module('openshiftConsole')
 //                    by attribute (e.g. data.by('metadata.name'))
 // opts:      options (currently none, placeholder)
   DataService.prototype.list = function(resource, context, callback, opts) {
-    resource = APIService.normalizeResource(resource);
-    var callbacks = this._listCallbacks(resource, context);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
+    var callbacks = this._listCallbacks(resourcePath, context);
     callbacks.add(callback);
 
-    if (this._watchInFlight(resource, context) && this._resourceVersion(resource, context)) {
+    if (this._watchInFlight(resourcePath, context) && this._resourceVersion(resourcePath, context)) {
       // A watch operation is running, and we've already received the
       // initial set of data for this resource
-      callbacks.fire(this._data(resource, context));
+      callbacks.fire(this._data(resourcePath, context));
       callbacks.empty();
     }
-    else if (this._listInFlight(resource, context)) {
+    else if (this._listInFlight(resourcePath, context)) {
       // no-op, our callback will get called when listOperation completes
     }
     else {
-      this._startListOp(resource, context);
+      this._startListOp(resourcePath, context);
     }
   };
 
@@ -131,11 +128,12 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.delete = function(resource, name, context, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
-    this._getNamespace(resource, context, opts).then(function(ns){
+    this._getNamespace(resourcePath, context, opts).then(function(ns){
       $http(angular.extend({
         method: 'DELETE',
         auth: {},
@@ -163,11 +161,12 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.update = function(resource, name, object, context, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
-    this._getNamespace(resource, context, opts).then(function(ns){
+    this._getNamespace(resourcePath, context, opts).then(function(ns){
       $http(angular.extend({
         method: 'PUT',
         auth: {},
@@ -197,11 +196,12 @@ angular.module('openshiftConsole')
 // opts:      http - options to pass to the inner $http call
 // Returns a promise resolved with response data or rejected with {data:..., status:..., headers:..., config:...} when the delete call completes.
   DataService.prototype.create = function(resource, name, object, context, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
     var deferred = $q.defer();
     var self = this;
-    this._getNamespace(resource, context, opts).then(function(ns){
+    this._getNamespace(resourcePath, context, opts).then(function(ns){
       $http(angular.extend({
         method: 'POST',
         auth: {},
@@ -285,7 +285,8 @@ angular.module('openshiftConsole')
 //            http - options to pass to the inner $http call
 //            errorNotification - will popup an error notification if the API request fails (default true)
   DataService.prototype.get = function(resource, name, context, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
 
     var force = !!opts.force;
@@ -293,15 +294,15 @@ angular.module('openshiftConsole')
 
     var deferred = $q.defer();
 
-    var existingData = this._data(resource, context);
+    var existingData = this._data(resourcePath, context);
 
     // If this is a cached resource (immutable resources only), ignore the force parameter
-    if (this._isResourceCached(resource) && existingData && existingData.by('metadata.name')[name]) {
+    if (this._isResourceCached(resourcePath) && existingData && existingData.by('metadata.name')[name]) {
       $timeout(function() {
         deferred.resolve(existingData.by('metadata.name')[name]);
       }, 0);
     }
-    else if (!force && this._watchInFlight(resource, context) && this._resourceVersion(resource, context)) {
+    else if (!force && this._watchInFlight(resourcePath, context) && this._resourceVersion(resourcePath, context)) {
       var obj = existingData.by('metadata.name')[name];
       if (obj) {
         $timeout(function() {
@@ -322,7 +323,7 @@ angular.module('openshiftConsole')
     }
     else {
       var self = this;
-      this._getNamespace(resource, context, opts).then(function(ns){
+      this._getNamespace(resourcePath, context, opts).then(function(ns){
         $http(angular.extend({
           method: 'GET',
           auth: {},
@@ -331,7 +332,7 @@ angular.module('openshiftConsole')
         .success(function(data, status, headerFunc, config, statusText) {
           if (self._isResourceCached(resource)) {
             if (!existingData) {
-              self._data(resource, context, [data]);
+              self._data(resourcePath, context, [data]);
             }
             else {
               existingData.update(data, "ADDED");
@@ -341,7 +342,7 @@ angular.module('openshiftConsole')
         })
         .error(function(data, status, headers, config) {
           if (opts.errorNotification !== false) {
-            var msg = "Failed to get " + resource + "/" + name;
+            var msg = "Failed to get " + resourcePath + "/" + name;
             if (status !== 0) {
               msg += " (" + status + ")";
             }
@@ -370,8 +371,10 @@ function b64_to_utf8( str ) {
 // TODO (bpeterse): Create a new Streamer service & get this out of DataService.
 DataService.prototype.createStream = function(kind, name, context, opts, isRaw) {
   var getNamespace = this._getNamespace.bind(this);
-  kind = APIService.kindToResource(kind) ?
-              APIService.kindToResource(kind) :
+  // TODO: why did this change? doesn't work to use kindToResource now, will make 'log' into 'logs'...
+  // has it been broken long?
+  kind = // APIService.kindToResource(kind) ?
+  //             APIService.kindToResource(kind) :
               APIService.normalizeResource(kind);
   var protocols = isRaw ? 'binary.k8s.io' : 'base64.binary.k8s.io';
   var identifier = 'stream_';
@@ -508,50 +511,51 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 //        var handle = DataService.watch(resource,context,callback[,opts])
 //        DataService.unwatch(handle)
   DataService.prototype.watch = function(resource, context, callback, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
 
     if (callback) {
       // If we were given a callback, add it
-      this._watchCallbacks(resource, context).add(callback);
+      this._watchCallbacks(resourcePath, context).add(callback);
     }
-    else if (!this._watchCallbacks(resource, context).has()) {
+    else if (!this._watchCallbacks(resourcePath, context).has()) {
       // We can be called with no callback in order to re-run a list/watch sequence for existing callbacks
       // If there are no existing callbacks, return
       return {};
     }
 
-    var existingWatchOpts = this._watchOptions(resource, context);
+    var existingWatchOpts = this._watchOptions(resourcePath, context);
     if (existingWatchOpts) {
       // Check any options for compatibility with existing watch
       if (existingWatchOpts.poll != opts.poll) {
-        throw "A watch already exists for " + resource + " with a different polling option.";
+        throw "A watch already exists for " + resourcePath + " with a different polling option.";
       }
     }
     else {
-      this._watchOptions(resource, context, opts);
+      this._watchOptions(resourcePath, context, opts);
     }
 
     var self = this;
 
-    if (this._watchInFlight(resource, context) && this._resourceVersion(resource, context)) {
+    if (this._watchInFlight(resourcePath, context) && this._resourceVersion(resourcePath, context)) {
       if (callback) {
         $timeout(function() {
-          callback(self._data(resource, context));
+          callback(self._data(resourcePath, context));
         }, 0);
       }
     }
     else {
       if (callback) {
-        var existingData = this._data(resource, context);
+        var existingData = this._data(resourcePath, context);
         if (existingData) {
           $timeout(function() {
             callback(existingData);
           }, 0);
         }
       }
-      if (!this._listInFlight(resource, context)) {
-        this._startListOp(resource, context);
+      if (!this._listInFlight(resourcePath, context)) {
+        this._startListOp(resourcePath, context);
       }
     }
 
@@ -585,36 +589,37 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 //        var handle = DataService.watch(resource,context,callback[,opts])
 //        DataService.unwatch(handle)
   DataService.prototype.watchObject = function(resource, name, context, callback, opts) {
-    resource = APIService.normalizeResource(resource);
+    // resource = APIService.normalizeResource(resource);
+    var resourcePath = APIService.qualifyResource(resource).resource;
     opts = opts || {};
 
     var wrapperCallback;
     if (callback) {
       // If we were given a callback, add it
-      this._watchObjectCallbacks(resource, name, context).add(callback);
+      this._watchObjectCallbacks(resourcePath, name, context).add(callback);
       var self = this;
       wrapperCallback = function(items, event, item) {
         // If we got an event for a single item, only fire the callback if its the item we care about
         if (item && item.metadata.name === name) {
-          self._watchObjectCallbacks(resource, name, context).fire(item, event);
+          self._watchObjectCallbacks(resourcePath, name, context).fire(item, event);
         }
         else if (!item) {
           // Otherwise its an initial listing, see if we can find the item we care about in the list
           var itemsByName = items.by("metadata.name");
           if (itemsByName[name]) {
-            self._watchObjectCallbacks(resource, name, context).fire(itemsByName[name]);
+            self._watchObjectCallbacks(resourcePath, name, context).fire(itemsByName[name]);
           }
         }
       };
     }
-    else if (!this._watchObjectCallbacks(resource, name, context).has()) {
+    else if (!this._watchObjectCallbacks(resourcePath, name, context).has()) {
       // This block may not be needed yet, don't expect this would get called without a callback currently...
       return {};
     }
 
     // For now just watch the type, eventually we may want to do something more complicated
     // and watch just the object if the type is not already being watched
-    var handle = this.watch(resource, context, wrapperCallback, opts);
+    var handle = this.watch(resourcePath, context, wrapperCallback, opts);
     handle.objectCallback = callback;
     handle.objectName = name;
 
