@@ -30,11 +30,13 @@ angular.module('openshiftConsole')
         return api.resources[_.first(resource.split('/'))];
       });
 
-      return {
-        hostPort: found.hostPort,
-        prefix: found.prefixes[qualified.version] || found.prefixes[defaultVersionForGroup[qualified.group]],
-        version: qualified.version || defaultVersionForGroup[qualified.group]
-      }
+      return found ?
+              {
+                hostPort: found.hostPort,
+                prefix: found.prefixes[qualified.version] || found.prefixes[defaultVersionForGroup[qualified.group]],
+                version: qualified.version || defaultVersionForGroup[qualified.group]
+              } :
+              undefined;
     };
 
 
