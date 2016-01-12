@@ -42,7 +42,7 @@ angular.module('openshiftConsole')
 
     // URITemplate has no ability to do conditional {+group}, so templates are now broken up
     var API_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{version}/";
-    var API_GROUP_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{+group}/{version}/";
+    var API_GROUP_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/apis/{+group}/{version}/";
 
     var URL_GET_LIST              = "{resource}{?q*}";
     var URL_OBJECT                = "{resource}/{name}{/subresource*}{?q*}";
@@ -87,7 +87,7 @@ angular.module('openshiftConsole')
     var resourceInfo = function(resource) {
       console.warn('TODO: resourceInfo is not implemented....!', !!findAPIFor(qualifyResource(resource)));
       return !!findAPIFor(qualifyResource(resource));
-    }
+    };
 
 
     // port of restmapper.go#normalizeResource

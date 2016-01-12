@@ -1091,7 +1091,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     Logger.log("Rewatching for resource/context", resourcePath, context);
     this._watchInFlight(resourcePath, context, true);
     setTimeout(
-      $.proxy(this, "_startWatchOp", resource, context, this._resourceVersion(resourcePath, context)),
+      $.proxy(this, "_startWatchOp", resourcePath, context, this._resourceVersion(resourcePath, context)),
       2000
     );
   };
