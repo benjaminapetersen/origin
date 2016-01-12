@@ -330,7 +330,7 @@ angular.module('openshiftConsole')
           url: APIService.urlForResource(resource, name, null, context, false, ns)
         }, opts.http || {}))
         .success(function(data, status, headerFunc, config, statusText) {
-          if (self._isResourceCached(resource)) {
+          if (self._isResourceCached(resourcePath)) {
             if (!existingData) {
               self._data(resourcePath, context, [data]);
             }
@@ -371,11 +371,7 @@ function b64_to_utf8( str ) {
 // TODO (bpeterse): Create a new Streamer service & get this out of DataService.
 DataService.prototype.createStream = function(kind, name, context, opts, isRaw) {
   var getNamespace = this._getNamespace.bind(this);
-  // TODO: why did this change? doesn't work to use kindToResource now, will make 'log' into 'logs'...
-  // has it been broken long?
-  kind = // APIService.kindToResource(kind) ?
-  //             APIService.kindToResource(kind) :
-              APIService.normalizeResource(kind);
+  var resourcePath = APIService.normalizeResource(kind);
   var protocols = isRaw ? 'binary.k8s.io' : 'base64.binary.k8s.io';
   var identifier = 'stream_';
   var openQueue = {};
@@ -385,11 +381,11 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 
   var stream;
   var makeStream = function() {
-     return getNamespace(kind, context, {})
+     return getNamespace(resourcePath, context, {})
                 .then(function(params) {
                   var cumulativeBytes = 0;
                   return  $ws({
-                            url: APIService.urlForResource(kind, name, null, context, true, _.extend(params, opts)),
+                            url: APIService.urlForResource(resourcePath, name, null, context, true, _.extend(params, opts)),
                             auth: {},
                             onopen: function(evt) {
                               _.each(openQueue, function(fn) {
@@ -555,13 +551,13 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
         }
       }
       if (!this._listInFlight(resourcePath, context)) {
-        this._startListOp(resourcePath, context);
+        this._startListOp(resource, context);
       }
     }
 
     // returned handle needs resource, context, and callback in order to unwatch
     return {
-      resource: resource,
+      resource: resourcePath,
       context: context,
       callback: callback,
       opts: opts
@@ -669,24 +665,24 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._watchCallbacks = function(resource, context) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._watchCallbacks = function(resourcePath, context) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!this._watchCallbacksMap[key]) {
       this._watchCallbacksMap[key] = $.Callbacks();
     }
     return this._watchCallbacksMap[key];
   };
 
-  DataService.prototype._watchObjectCallbacks = function(resource, name, context) {
-    var key = this._uniqueKeyForResourceContext(resource, context) + "/" + name;
+  DataService.prototype._watchObjectCallbacks = function(resourcePath, name, context) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context) + "/" + name;
     if (!this._watchObjectCallbacksMap[key]) {
       this._watchObjectCallbacksMap[key] = $.Callbacks();
     }
     return this._watchObjectCallbacksMap[key];
   };
 
-  DataService.prototype._listCallbacks = function(resource, context) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._listCallbacks = function(resourcePath, context) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!this._listCallbacksMap[key]) {
       this._listCallbacksMap[key] = $.Callbacks();
     }
@@ -694,8 +690,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
   };
 
   // maybe change these
-  DataService.prototype._watchInFlight = function(resource, context, op) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._watchInFlight = function(resourcePath, context, op) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!op && op !== false) {
       return this._watchOperationMap[key];
     }
@@ -704,8 +700,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._listInFlight = function(resource, context, op) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._listInFlight = function(resourcePath, context, op) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!op && op !== false) {
       return this._listOperationMap[key];
     }
@@ -714,8 +710,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._resourceVersion = function(resource, context, rv) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._resourceVersion = function(resourcePath, context, rv) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!rv) {
       return this._resourceVersionMap[key];
     }
@@ -724,8 +720,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._data = function(resource, context, data) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._data = function(resourcePath, context, data) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!data) {
       return this._dataMap[key];
     }
@@ -734,8 +730,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._watchOptions = function(resource, context, opts) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._watchOptions = function(resourcePath, context, opts) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (opts === undefined) {
       return this._watchOptionsMap[key];
     }
@@ -744,8 +740,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._watchPollTimeouts = function(resource, context, timeout) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._watchPollTimeouts = function(resourcePath, context, timeout) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!timeout) {
       return this._watchPollTimeoutsMap[key];
     }
@@ -754,8 +750,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
   };
 
-  DataService.prototype._watchWebsockets = function(resource, context, timeout) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._watchWebsockets = function(resourcePath, context, timeout) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     if (!timeout) {
       return this._watchWebsocketsMap[key];
     }
@@ -767,8 +763,8 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
   // Maximum number of websocket events to track per resource/context in _websocketEventsMap.
   var maxWebsocketEvents = 10;
 
-  DataService.prototype._addWebsocketEvent = function(resource, context, eventType) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._addWebsocketEvent = function(resourcePath, context, eventType) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     var events = this._websocketEventsMap[key];
     if (!events) {
       events = this._websocketEventsMap[key] = [];
@@ -809,49 +805,50 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     return true;
   }
 
-  DataService.prototype._isTooManyWebsocketRetries = function(resource, context) {
-    var key = this._uniqueKeyForResourceContext(resource, context);
+  DataService.prototype._isTooManyWebsocketRetries = function(resourcePath, context) {
+    var key = this._uniqueKeyForResourceContext(resourcePath, context);
     var events = this._websocketEventsMap[key];
     if (!events) {
       return false;
     }
 
     if (isTooManyRecentEvents(events)) {
-      Logger.log("Too many websocket open or close events for resource/context in a short period", resource, context, events);
+      Logger.log("Too many websocket open or close events for resource/context in a short period", resourcePath, context, events);
       return true;
     }
 
     if (isTooManyConsecutiveCloses(events)) {
-      Logger.log("Too many consecutive websocket close events for resource/context", resource, context, events);
+      Logger.log("Too many consecutive websocket close events for resource/context", resourcePath, context, events);
       return true;
     }
 
     return false;
   };
 
-  DataService.prototype._uniqueKeyForResourceContext = function(resource, context) {
+  DataService.prototype._uniqueKeyForResourceContext = function(resourcePath, context) {
     // Note: when we start handling selecting multiple projects this
     // will change to include all relevant scope
-    if (resource === "projects" || resource === "projectrequests") { // when we are loading non-namespaced resources we don't need additional context
-      return resource;
+    if (resourcePath === "projects" || resourcePath === "projectrequests") { // when we are loading non-namespaced resources we don't need additional context
+      return resourcePath;
     }
     else if (context.namespace) {
-      return resource + "/" + context.namespace;
+      return resourcePath + "/" + context.namespace;
     }
     else if (context.project && context.project.metadata) {
-      return resource + "/" + context.project.metadata.name;
+      return resourcePath + "/" + context.project.metadata.name;
     }
     else if (context.projectName) {
-      return resource + "/" + context.projectName;
+      return resourcePath + "/" + context.projectName;
     }
     else {
-      return resource;
+      return resourcePath;
     }
   };
 
   DataService.prototype._startListOp = function(resource, context) {
+    var resourcePath = APIService.qualifyResource(resource).resource;
     // mark the operation as in progress
-    this._listInFlight(resource, context, true);
+    this._listInFlight(resourcePath, context, true);
 
     var self = this;
     if (context.projectPromise && resource !== "projects") {
@@ -863,7 +860,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
         }).success(function(data, status, headerFunc, config, statusText) {
           self._listOpComplete(resource, context, data);
         }).error(function(data, status, headers, config) {
-          var msg = "Failed to list " + resource;
+          var msg = "Failed to list " + resourcePath;
           if (status !== 0) {
             msg += " (" + status + ")";
           }
@@ -880,7 +877,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       }).success(function(data, status, headerFunc, config, statusText) {
         self._listOpComplete(resource, context, data);
       }).error(function(data, status, headers, config) {
-        var msg = "Failed to list " + resource;
+        var msg = "Failed to list " + resourcePath;
         if (status !== 0) {
           msg += " (" + status + ")";
         }
@@ -891,6 +888,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
   };
 
   DataService.prototype._listOpComplete = function(resource, context, data) {
+    var resourcePath = APIService.qualifyResource(resource).resource;
     // Here we normalize all items to have a kind property.
     // One of the warts in the kubernetes REST API is that items retrieved
     // via GET on a list resource won't have a kind property set.
@@ -906,29 +904,30 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       });
     }
 
-    this._resourceVersion(resource, context, data.resourceVersion || data.metadata.resourceVersion);
-    this._data(resource, context, data.items);
-    this._listCallbacks(resource, context).fire(this._data(resource, context));
-    this._listCallbacks(resource, context).empty();
-    this._watchCallbacks(resource, context).fire(this._data(resource, context));
+    this._resourceVersion(resourcePath, context, data.resourceVersion || data.metadata.resourceVersion);
+    this._data(resourcePath, context, data.items);
+    this._listCallbacks(resourcePath, context).fire(this._data(resourcePath, context));
+    this._listCallbacks(resourcePath, context).empty();
+    this._watchCallbacks(resourcePath, context).fire(this._data(resourcePath, context));
 
     // mark list op as complete
-    this._listInFlight(resource, context, false);
+    this._listInFlight(resourcePath, context, false);
 
-    if (this._watchCallbacks(resource, context).has()) {
-      var watchOpts = this._watchOptions(resource, context) || {};
+    if (this._watchCallbacks(resourcePath, context).has()) {
+      var watchOpts = this._watchOptions(resourcePath, context) || {};
       if (watchOpts.poll) {
-        this._watchInFlight(resource, context, true);
-        this._watchPollTimeouts(resource, context, setTimeout($.proxy(this, "_startListOp", resource, context), watchOpts.pollInterval || 5000));
+        this._watchInFlight(resourcePath, context, true);
+        this._watchPollTimeouts(resourcePath, context, setTimeout($.proxy(this, "_startListOp", resourcePath, context), watchOpts.pollInterval || 5000));
       }
-      else if (!this._watchInFlight(resource, context)) {
-        this._startWatchOp(resource, context, this._resourceVersion(resource, context));
+      else if (!this._watchInFlight(resourcePath, context)) {
+        this._startWatchOp(resource, context, this._resourceVersion(resourcePath, context));
       }
     }
   };
 
   DataService.prototype._startWatchOp = function(resource, context, resourceVersion) {
-    this._watchInFlight(resource, context, true);
+    var resourcePath = APIService.qualifyResource(resource).resource;
+    this._watchInFlight(resourcePath, context, true);
     // Note: current impl uses one websocket per resource
     // eventually want a single websocket connection that we
     // send a subscription request to for each resource
@@ -941,19 +940,19 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       if (resourceVersion) {
         params.resourceVersion = resourceVersion;
       }
-      if (context.projectPromise && resource !== "projects") {
+      if (context.projectPromise && resourcePath !== "projects") {
         context.projectPromise.done(function(project) {
           params.namespace = project.metadata.name;
           $ws({
             method: "WATCH",
             url: APIService.urlForResource(resource, null, null, context, true, params),
             auth:      {},
-            onclose:   $.proxy(self, "_watchOpOnClose",   resource, context),
-            onmessage: $.proxy(self, "_watchOpOnMessage", resource, context),
-            onopen:    $.proxy(self, "_watchOpOnOpen",    resource, context)
+            onclose:   $.proxy(self, "_watchOpOnClose",   resourcePath, context),
+            onmessage: $.proxy(self, "_watchOpOnMessage", resourcePath, context),
+            onopen:    $.proxy(self, "_watchOpOnOpen",    resourcePath, context)
           }).then(function(ws) {
             Logger.log("Watching", ws);
-            self._watchWebsockets(resource, context, ws);
+            self._watchWebsockets(resourcePath, context, ws);
           });
         });
       }
@@ -962,28 +961,28 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
           method: "WATCH",
           url: APIService.urlForResource(resource, null, null, context, true, params),
           auth:      {},
-          onclose:   $.proxy(self, "_watchOpOnClose",   resource, context),
-          onmessage: $.proxy(self, "_watchOpOnMessage", resource, context),
-          onopen:    $.proxy(self, "_watchOpOnOpen",    resource, context)
+          onclose:   $.proxy(self, "_watchOpOnClose",   resourcePath, context),
+          onmessage: $.proxy(self, "_watchOpOnMessage", resourcePath, context),
+          onopen:    $.proxy(self, "_watchOpOnOpen",    resourcePath, context)
         }).then(function(ws){
           Logger.log("Watching", ws);
-          self._watchWebsockets(resource, context, ws);
+          self._watchWebsockets(resourcePath, context, ws);
         });
       }
     }
   };
 
-  DataService.prototype._watchOpOnOpen = function(resource, context, event) {
-    Logger.log('Websocket opened for resource/context', resource, context);
-    this._addWebsocketEvent(resource, context, 'open');
+  DataService.prototype._watchOpOnOpen = function(resourcePath, context, event) {
+    Logger.log('Websocket opened for resource/context', resourcePath, context);
+    this._addWebsocketEvent(resourcePath, context, 'open');
   };
 
-  DataService.prototype._watchOpOnMessage = function(resource, context, event) {
+  DataService.prototype._watchOpOnMessage = function(resourcePath, context, event) {
     try {
       var eventData = $.parseJSON(event.data);
 
       if (eventData.type == "ERROR") {
-        Logger.log("Watch window expired for resource/context", resource, context);
+        Logger.log("Watch window expired for resource/context", resourcePath, context);
         if (event.target) {
           event.target.shouldRelist = true;
         }
@@ -998,34 +997,34 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       }
 
       if (eventData.object) {
-        this._resourceVersion(resource, context, eventData.object.resourceVersion || eventData.object.metadata.resourceVersion);
+        this._resourceVersion(resourcePath, context, eventData.object.resourceVersion || eventData.object.metadata.resourceVersion);
       }
       // TODO do we reset all the by() indices, or simply update them, since we should know what keys are there?
       // TODO let the data object handle its own update
-      this._data(resource, context).update(eventData.object, eventData.type);
+      this._data(resourcePath, context).update(eventData.object, eventData.type);
       var self = this;
       // Wrap in a $timeout which will trigger an $apply to mirror $http callback behavior
       // without timeout this is triggering a repeated digest loop
       $timeout(function() {
-        self._watchCallbacks(resource, context).fire(self._data(resource, context), eventData.type, eventData.object);
+        self._watchCallbacks(resourcePath, context).fire(self._data(resourcePath, context), eventData.type, eventData.object);
       }, 0);
     }
     catch (e) {
       // TODO: surface in the UI?
-      Logger.error("Error processing message", resource, event.data);
+      Logger.error("Error processing message", resourcePath, event.data);
     }
   };
 
-  DataService.prototype._watchOpOnClose = function(resource, context, event) {
+  DataService.prototype._watchOpOnClose = function(resourcePath, context, event) {
     var eventWS = event.target;
     if (!eventWS) {
       Logger.log("Skipping reopen, no eventWS in event", event);
       return;
     }
 
-    var registeredWS = this._watchWebsockets(resource, context);
+    var registeredWS = this._watchWebsockets(resourcePath, context);
     if (!registeredWS) {
-      Logger.log("Skipping reopen, no registeredWS for resource/context", resource, context);
+      Logger.log("Skipping reopen, no registeredWS for resource/context", resourcePath, context);
       return;
     }
 
@@ -1037,7 +1036,7 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
 
     // We are the registered web socket for this resource/context, and we are no longer in flight
     // Unlock this resource/context in case we decide not to reopen
-    this._watchInFlight(resource, context, false);
+    this._watchInFlight(resourcePath, context, false);
 
     // Don't reopen web sockets we closed ourselves
     if (eventWS.shouldClose) {
@@ -1052,13 +1051,13 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
 
     // Don't reopen if no one is listening for this data any more
-    if (!this._watchCallbacks(resource, context).has()) {
-      Logger.log("Skipping reopen, no listeners registered for resource/context", resource, context);
+    if (!this._watchCallbacks(resourcePath, context).has()) {
+      Logger.log("Skipping reopen, no listeners registered for resource/context", resourcePath, context);
       return;
     }
 
     // Don't reopen if we've failed this resource/context too many times
-    if (this._isTooManyWebsocketRetries(resource, context)) {
+    if (this._isTooManyWebsocketRetries(resourcePath, context)) {
       Notification.error("Server connection interrupted.", {
         id: "websocket_retry_halted",
         mustDismiss: true,
@@ -1070,11 +1069,11 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     }
 
     // Keep track of this event.
-    this._addWebsocketEvent(resource, context, 'close');
+    this._addWebsocketEvent(resourcePath, context, 'close');
 
     // If our watch window expired, we have to relist to get a new resource version to watch from
     if (eventWS.shouldRelist) {
-      Logger.log("Relisting for resource/context", resource, context);
+      Logger.log("Relisting for resource/context", resourcePath, context);
       // Restart a watch() from the beginning, which triggers a list/watch sequence
       // The watch() call is responsible for setting _watchInFlight back to true
       // Add a short delay to avoid a scenario where we make non-stop requests
@@ -1082,17 +1081,17 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
       //   resource/context, or if a watch is already in flight, `watch()` is a no-op
       var self = this;
       setTimeout(function() {
-        self.watch(resource, context);
+        self.watch(resourcePath, context);
       }, 2000);
       return;
     }
 
     // Attempt to re-establish the connection after a two-second back-off
     // Re-mark ourselves as in-flight to prevent other callers from jumping in in the meantime
-    Logger.log("Rewatching for resource/context", resource, context);
-    this._watchInFlight(resource, context, true);
+    Logger.log("Rewatching for resource/context", resourcePath, context);
+    this._watchInFlight(resourcePath, context, true);
     setTimeout(
-      $.proxy(this, "_startWatchOp", resource, context, this._resourceVersion(resource, context)),
+      $.proxy(this, "_startWatchOp", resource, context, this._resourceVersion(resourcePath, context)),
       2000
     );
   };
@@ -1101,16 +1100,16 @@ DataService.prototype.createStream = function(kind, name, context, opts, isRaw) 
     imagestreamimages: true
   };
 
-  DataService.prototype._isResourceCached = function(resource) {
-    return !!CACHED_RESOURCE[resource];
+  DataService.prototype._isResourceCached = function(resourcePath) {
+    return !!CACHED_RESOURCE[resourcePath];
   };
 
-  DataService.prototype._getNamespace = function(resource, context, opts) {
+  DataService.prototype._getNamespace = function(resourcePath, context, opts) {
     var deferred = $q.defer();
     if (opts.namespace) {
       deferred.resolve({namespace: opts.namespace});
     }
-    else if (context.projectPromise && resource !== "projects") {
+    else if (context.projectPromise && resourcePath !== "projects") {
       context.projectPromise.done(function(project) {
         deferred.resolve({namespace: project.metadata.name});
       });
