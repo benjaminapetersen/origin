@@ -168,7 +168,7 @@ angular.module("openshiftConsole")
                           alerts.push({
                             type: "error",
                             message: "Cannot create " + humanize(objectName).toLowerCase() + ". ",
-                            details: failure.data.message
+                            details: failure.data && failure.data.message
                           });
                         }
                       );
@@ -227,4 +227,3 @@ angular.module("openshiftConsole")
         };
       }));
   });
-
