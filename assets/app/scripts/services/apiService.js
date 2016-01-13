@@ -27,13 +27,15 @@ angular.module('openshiftConsole')
         };
       }
       var found = _.find(API_CFG, function(api) {
-        return api.resources[_.first(resource.split('/'))];
+        return api.resources[_.first(resource.split('/'))] || api.resources['*']; // ['*'] ?
       });
 
       return found ?
               {
                 hostPort: found.hostPort,
-                prefix: found.prefixes[qualified.version] || found.prefixes[defaultVersionForGroup[qualified.group]],
+                prefix: found.prefixes[qualified.version] ||
+                        found.prefixes[defaultVersionForGroup[qualified.group]] ||
+                        found.prefixes['*'],
                 version: qualified.version || defaultVersionForGroup[qualified.group]
               } :
               undefined;
