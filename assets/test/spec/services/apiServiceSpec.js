@@ -9,6 +9,56 @@ describe("APIService", function(){
     });
   });
 
+  describe('#qualifyResource', function() {
+    var tc = [
+      ['pods',                                                        { resource : 'pods', group : '', version : 'v1' }],
+      [{resource: 'pods'},                                            { resource : 'pods', group : '', version : 'v1' }],
+      [{resource: 'pods', group: ''},                                 { resource : 'pods', group : '', version : 'v1' }],
+      [{resource: 'pods', group: '', version: 'v1'},                  { resource : 'pods', group : '', version : 'v1' }],
+      [{resource: 'horizontalpodautoscalers', group: 'extensions'},   { resource : 'horizontalpodautoscalers', group : 'extensions', version : 'v1beta1' }]
+    ];
+
+    angular.forEach(tc, function(item) {
+      it('should ensure '+JSON.stringify(item[0])+' is fully qualified ', function() {
+        expect(APIService.qualifyResource(item[0])).toEqual(item[1]);
+      });
+    });
+  });
+
+  describe('#deriveResource', function() {
+  //   var tc = [
+  //     [{
+  //       apiVersion: "extensions/v1beta1",
+  //       kind: "HorizontalPodAutoscaler",
+  //       metadata: {},
+  //       spec: {}
+  //     }, {}],
+  //     [{
+  //        kind: "Route",
+  //        apiVersion: 'v1',
+  //        metadata: {},
+  //        spec: {}
+  //     }, {}],
+  //     [{
+  //       apiVersion: 'v1',
+  //       kind: "DeploymentConfig",
+  //       metadata: {}
+  //     }, {}]
+  //   ];
+  //
+  //   angular.forEach(tc, function(item) {
+  //     it('should derive qualified resource form a provided data object', function() {
+  //         expect(APIService.deriveResource(item[0])).toEqual(item[1]);
+  //     });
+  //   });
+  });
+
+  describe('#normalizeResource', function() {});
+  describe('#kindToResource', function() {});
+  describe('#apiExistsFor', function() {});
+  describe('#openshiftAPIBaseUrl', function() {});
+  describe('#urlForResource', function() {});
+
   describe("#url", function(){
 
     var tc = [
@@ -66,19 +116,13 @@ describe("APIService", function(){
       [{resource:'pods/log', namespace:"foo", isWebsocket:true, follow: true                       }, "ws://localhost:8443/api/v1/namespaces/foo/pods?follow=true"],
       [{resource:'builds/log', namespace:"foo", isWebsocket:true, follow: true                     }, "ws://localhost:8443/oapi/v1/namespaces/foo/builds?follow=true"],
 
-
-
       // Namespaced subresource with params
       [{resource:'pods/proxy', name:"mypod", namespace:"myns", myparam1:"myvalue"}, "http://localhost:8443/api/v1/namespaces/myns/pods/mypod/proxy?myparam1=myvalue"],
 
-      // Different API versions
-      [{resource:'builds',apiVersion:'v1beta3'}, null],
-      [{resource:'builds',apiVersion:'v1'     }, "http://localhost:8443/oapi/v1/builds"],
-      [{resource:'builds',apiVersion:'unknown'}, null],
-
-      [{resource:'pods',  apiVersion:'v1beta3'}, null],
-      [{resource:'pods',  apiVersion:'v1'     }, "http://localhost:8443/api/v1/pods"],
-      [{resource:'pods',  apiVersion:'unknown'}, null]
+      // APIGroups {resource: '', group: '', version: ''}
+      [{resource:'horizontalpodautoscalers', group: 'extensions', version:'v1beta1', namespace: 'foo'}, "http://localhost:8443/apis/extensions/v1beta1/namespaces/foo/horizontalpodautoscalers"],
+      [{resource: 'pods', version: 'v1'}, 'http://localhost:8443/api/v1/pods'],
+      [{resource: 'pods', group: ''}, 'http://localhost:8443/api/v1/pods']
     ];
 
     angular.forEach(tc, function(item) {
@@ -86,7 +130,6 @@ describe("APIService", function(){
         expect(APIService.url(item[0])).toEqual(item[1]);
       });
     });
-
   });
 
 });

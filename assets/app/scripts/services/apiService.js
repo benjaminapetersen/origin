@@ -40,9 +40,17 @@ angular.module('openshiftConsole')
     };
 
 
+    // TODO: improve this when we have API discovery...
+    // takes: {resource: '', group:'', verison: ''} or string "pods"
+    // if string, will result in a v1 api, oapi response
+    var apiExistsFor = function(unqualified) {
+      return !!findAPIFor(qualifyResource(unqualified));
+    };
+
+
     // URITemplate has no ability to do conditional {+group}, so templates are now broken up
     var API_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{version}/";
-    var API_GROUP_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/apis/{+group}/{version}/";
+    var API_GROUP_TEMPLATE = "{protocol}://{+hostPort}{+prefix}/{+group}/{version}/";
 
     var URL_GET_LIST              = "{resource}{?q*}";
     var URL_OBJECT                = "{resource}/{name}{/subresource*}{?q*}";
@@ -149,7 +157,7 @@ angular.module('openshiftConsole')
       if(!qualified.version) {
         qualified.version = apiVersion || defaultVersionForGroup[qualified.group];
       }
-      delete qualified.version; // apiVersion
+      // delete qualified.version; // apiVersion
       delete qualified.kind;
       return qualified;
     };
@@ -189,6 +197,25 @@ angular.module('openshiftConsole')
     };
 
 
+    var urlForResource = function(unqualifiedResource, name, apiVersion, context, isWebsocket, params) {
+      var qualified = qualifyResource(unqualifiedResource, apiVersion);
+      var namespace = findNamespace(context, params);
+      return findAPIFor(qualified) ?
+              URI
+                .expand(
+                  findTemplateFor(name, namespace, qualified.group),
+                  _.extend({}, qualified, findAPIFor(qualified), {
+                    resource: _.first(qualified.resource.split('/')),
+                    subresource: _.rest(qualified.resource.split('/')),
+                    name: name,
+                    namespace: namespace,
+                    q: cleanCopyParams(params),
+                    protocol: protocol(isWebsocket)
+                  })) :
+                  null;
+    };
+
+
     // NOTE: this is used in 2 places in app,
     // and is really just a proxy for urlForResource w/a
     // different syntax.  may be best to factor it out...
@@ -198,39 +225,22 @@ angular.module('openshiftConsole')
           delete opts.resource;
           delete opts.name;
           delete opts.apiVersion;
+          delete opts.version;
+          delete opts.group;
           delete opts.isWebsocket;
-          var resource = normalizeResource(options.resource);
-          var u = urlForResource(resource, options.name, options.apiVersion, null, !!options.isWebsocket, opts);
+          // will let urlForResource qualify
+          var unqualified = {
+            resource: normalizeResource(options.resource),
+            group: options.group,
+            version: options.version || options.apiVersion
+          };
+          var u = urlForResource(unqualified, options.name, options.apiVersion, null, !!options.isWebsocket, opts);
           if (u) {
             return u.toString();
           }
         }
         return null;
       };
-
-
-    var urlForResource = function(unqualifiedResource, name, apiVersion, context, isWebsocket, params) {
-      var qualified = qualifyResource(unqualifiedResource, apiVersion);
-      var namespace = findNamespace(context, params);
-      return URI
-              .expand(
-                findTemplateFor(name, namespace, qualified.group),
-                _.extend({}, qualified, findAPIFor(qualified), {
-                  resource: _.first(qualified.resource.split('/')),
-                  subresource: _.rest(qualified.resource.split('/')),
-                  name: name,
-                  namespace: namespace,
-                  q: cleanCopyParams(params),
-                  protocol: protocol(isWebsocket)
-                }));
-    };
-
-
-    // TODO: improve this when we have API discovery...
-    // for best results, provide {resource: '', group:'', verison: ''}
-    var apiExistsFor = function(unqualified) {
-      return !!findAPIFor(qualifyResource(unqualified));
-    };
 
 
     return {
