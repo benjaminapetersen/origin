@@ -226,15 +226,10 @@ angular.module('openshiftConsole')
     };
 
 
-    // TODO: is this resource+group+version valid for the server
-    // is not something we can implement until we have discovery ready to
-    // get a better API config.
-    var apiExistsFor = function() {
-      console.warn('apiExistsFor() is not yet implemented');
-      // TODO: createFromImage.js uses this and throws alerts
-      // if not a true response.  Need to implement something
-      // meaningful and useful. 
-      return true;
+    // TODO: improve this when we have API discovery...
+    // for best results, provide {resource: '', group:'', verison: ''}
+    var apiExistsFor = function(unqualified) {
+      return !!findAPIFor(qualifyResource(unqualified));
     };
 
 
