@@ -103,7 +103,6 @@ angular.module('openshiftConsole')
 //                    by attribute (e.g. data.by('metadata.name'))
 // opts:      options (currently none, placeholder)
   DataService.prototype.list = function(resource, context, callback, opts) {
-    // resource = APIService.normalizeResource(resource);
     var resourcePath = APIService.qualifyResource(resource).resource;
     var callbacks = this._listCallbacks(resourcePath, context);
     callbacks.add(callback);
@@ -243,8 +242,10 @@ angular.module('openshiftConsole')
     }
 
     objects.forEach(function(object) {
-      var resource = APIService.kindToResource(object.kind);
-      if (!resource) {
+      var resourcePath = APIService.kindToResource(object.kind);
+      var derived = APIService.deriveResource(object);
+
+      if (!resourcePath) {
         failureResults.push({
           data: {message: "Unrecognized kind " + object.kind}
         });
@@ -253,7 +254,7 @@ angular.module('openshiftConsole')
         return;
       }
 
-      if (!APIService.apiExistsFor(resource, object.apiVersion)) {
+      if (!APIService.apiExistsFor(derived, object.apiVersion)) {
         failureResults.push({
           data: {message: "Unknown API version "+object.apiVersion+" for kind " + object.kind}
         });
@@ -262,7 +263,7 @@ angular.module('openshiftConsole')
         return;
       }
 
-      self.create(resource, null, object, context, opts).then(
+      self.create(derived, null, object, context, opts).then(
         function (data) {
           successResults.push(data);
           remaining--;
