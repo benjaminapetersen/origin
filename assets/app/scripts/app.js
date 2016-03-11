@@ -23,7 +23,8 @@ angular
     'patternfly.charts',
     'patternfly.sort',
     'openshiftConsoleTemplates',
-    'ui.ace'
+    'ui.ace',
+    'extension-registry'
   ])
   .constant("mainNavTabs", [])  // even though its not really a "constant", it has to be created as a constant and not a value
                          // or it can't be referenced during module config
@@ -338,6 +339,21 @@ angular
         return durationFilter(timestamp, null, omitSingle, precision) || existing;
       });
     }, 1000);
+  })
+  .run(function(extensionRegistry) {
+    extensionRegistry
+      .add('nav-help-dropdown', function() {
+        return [
+          {
+            type: 'dom',
+            node: '<li><a href="https://docs.openshift.org/latest/welcome/index.html">Documentation</a></li>'
+          },
+          {
+            type: 'dom',
+            node: '<li><a href="about">About</a></li>'
+          }
+        ];
+      });
   });
 
 hawtioPluginLoader.addModule('openshiftConsole');
