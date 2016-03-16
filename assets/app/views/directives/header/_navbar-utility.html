@@ -56,18 +56,11 @@
       <span class="username truncate">{{user.fullName || user.metadata.name}}</span> <span class="caret" aria-hidden="true"></span>
     </a>
 
-    <div class="uib-dropdown-menu" aria-labelledby="user-dropdown">
-      <ul
-        class="nested-menu"
-        extension-point
-        extension-name="nav-user-dropdown"
-        extension-types="dom html"><!-- geneated extension points here --></ul>
-      <!-- logout should be last, if others added -->
-      <ul>
-        <li>
-          <a href="logout">Log out</a>
-        </li>
-      </ul>
-    </div>
+    <ul
+      class="uib-dropdown-menu"
+      aria-labelledby="user-dropdown"
+      extension-point
+      extension-name="nav-user-dropdown"
+      extension-types="dom html"><!-- geneated extension points here --></ul>
   </li>
 </ul>
